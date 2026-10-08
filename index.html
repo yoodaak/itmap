@@ -140,7 +140,7 @@ main{min-width:0;padding:32px 40px 72px}
   .sidebar{display:none}
   main{padding:16px 16px calc(96px + env(safe-area-inset-bottom,0px))}
   .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-  .bottomnav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+  .bottomnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
   .bottomnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted);padding:4px 0}
   .bottomnav button svg{width:20px;height:20px}
   .bottomnav button.on{color:var(--primary)}
@@ -488,6 +488,129 @@ table.cmp tbody tr:last-child th,table.cmp tbody tr:last-child td{border-bottom:
 .qaans .md{margin-top:10px;font-size:14.5px;max-width:none}
 .qaact{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .msgch{display:block;font-size:11px;opacity:.75}
+.sub{font-size:17px;margin:18px 0 12px;display:flex;gap:8px;align-items:baseline}
+.sub .muted{font-size:14px;font-weight:500}
+/* level */
+.lv{display:inline-flex;align-items:center;font-size:12px;font-weight:700;font-family:var(--f-mono);padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+.lv1{background:var(--err-soft);color:var(--err-text)}.lv2{background:var(--warn-soft);color:var(--warn-text)}.lv3{background:var(--primary-soft);color:var(--primary)}.lv4,.lv5{background:var(--ok-soft);color:var(--ok-text)}
+.lvline{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+.sidegaps{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.sidegaps .linkbtn{text-align:left;padding:2px 0}
+/* home */
+.home2{padding-top:24px}
+.greet{font-size:clamp(26px,4vw,34px);margin-bottom:20px}
+.hgrid{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:14px}
+.hcont{grid-row:span 2;display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--primary-soft),var(--surface) 70%);border-color:var(--primary-line)}
+.hcont h2{font-size:30px}
+.lvmeter{display:flex;align-items:center;gap:4px}
+.lvmeter i{width:22px;height:8px;border-radius:4px;background:var(--line)}
+.lvmeter i.on{background:var(--primary)}
+.lvmeter span{margin-left:8px;font-size:13px;font-weight:600;color:var(--primary)}
+.hcard{display:flex;flex-direction:column;gap:6px;text-align:left;padding:18px;min-width:0;transition:border-color .15s,transform .15s}
+.hcard:hover{border-color:var(--primary);transform:translateY(-1px)}
+.hcard .big{font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.hcard .big small{font-size:14px;margin-left:2px;color:var(--muted)}
+.hcard .mid{font-size:17px}
+.hline{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.hthink{background:var(--accent-soft)}
+.hsearch{margin-top:28px;display:flex;flex-direction:column;gap:10px}
+@media (max-width:900px){.hgrid{grid-template-columns:1fr 1fr}.hcont{grid-column:1/-1;grid-row:auto}}
+@media (max-width:520px){.hgrid{grid-template-columns:1fr}}
+/* understanding */
+.und{margin-top:28px;display:flex;flex-direction:column;gap:14px}
+.undform{display:flex;flex-direction:column;gap:12px}
+.undf{display:flex;flex-direction:column;gap:6px}
+.undf>span{font-size:14px;font-weight:600}
+.undview{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.undview>div{background:var(--surface-2);border-radius:10px;padding:10px 12px;min-width:0}
+.undview p{white-space:pre-wrap;font-size:14.5px;margin-top:2px}
+.undview .empty{background:none;border:1px dashed var(--line)}
+@media (max-width:640px){.undview{grid-template-columns:1fr}}
+.prefill{background:var(--accent-soft);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.prefill p{white-space:pre-wrap;font-size:14px}
+.fb-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.fbhead{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.fbgrp b{font-size:13.5px}
+.fbgrp ul{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.fbgrp li{display:flex;gap:8px;font-size:14px;line-height:1.55}
+.fbgrp .sign{flex:none;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;font-weight:700;font-size:12px;margin-top:1px}
+.fbgrp.good .sign{background:var(--ok-soft);color:var(--ok-text)}
+.fbgrp.miss .sign{background:var(--warn-soft);color:var(--warn-text)}
+.fbgrp.wrong .sign{background:var(--err-soft);color:var(--err-text)}
+.fbgrp.push .sign{background:var(--accent-soft);color:var(--accent);font-family:var(--f-mono)}
+.gapchip{border-style:dashed}
+/* socratic */
+.tiers{display:flex;gap:8px;flex-wrap:wrap}
+.reveal.more{background:var(--accent-soft)}
+.socbox{display:flex;flex-direction:column;gap:8px}
+.soc{border-radius:10px;padding:10px 12px}
+.soc.me{background:var(--surface-2)}
+.soc.me p{white-space:pre-wrap;font-size:14px}
+.soc.ai{background:var(--accent-soft)}
+.soc .md{font-size:14.5px}
+.soc .md p:last-child{margin-bottom:0}
+/* connections */
+.myconn{display:flex;flex-direction:column;gap:14px;border-top:1px dashed var(--line);padding-top:14px}
+.mcitem,.sgitem{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:14px;background:var(--surface)}
+.mcitem.fromai{border-style:dashed}
+.mcitem p,.sgitem p{font-size:13.5px}
+.sgitem{background:var(--accent-soft);border-color:transparent}
+.sgbox{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+/* gaps */
+.gapform{margin-bottom:12px;padding:14px}
+.gapai{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.gaplist{display:flex;flex-direction:column;gap:10px}
+.gapitem{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.gapitem.done{opacity:.65}
+.gapitem.done .gaptext{text-decoration:line-through}
+.gapchk{font-size:15.5px;font-weight:600;align-items:flex-start}
+.gapmeta{font-size:12.5px;color:var(--muted);padding-left:26px}
+.gapacts{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-left:26px}
+.gapans{margin-left:26px;background:var(--surface-2);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.gapans .md{font-size:14.5px;max-width:none}
+.donegaps{margin-top:20px}
+.donegaps summary{cursor:pointer;color:var(--muted);margin-bottom:10px}
+/* open think */
+.openthink{display:flex;flex-direction:column;gap:6px}
+.presetgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:10px}
+.pcard{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:4px;transition:border-color .15s}
+.pcard:hover{border-color:var(--accent)}
+.pcard b{font-size:14.5px}
+.pcard span{font-size:12.5px;color:var(--accent)}
+.pcard.mine{background:var(--accent-soft);border-color:transparent}
+.otgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:start}
+.otform{display:flex;flex-direction:column;gap:14px}
+.pushq{font-size:13px;background:var(--accent-soft);border-radius:8px;padding:6px 10px;color:var(--text)}
+.round{display:flex;flex-direction:column;gap:10px;padding:16px}
+.otmodel{margin-top:20px}
+@media (max-width:900px){.otgrid{grid-template-columns:minmax(0,1fr)}}
+/* review */
+.rvlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.rvcard{display:flex;flex-direction:column;gap:8px;align-items:flex-start;padding:16px}
+.rvtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:16px}
+.rvq{display:flex;flex-direction:column;gap:8px;padding:16px}
+.rvqq{font-size:16px;font-weight:600}
+/* space */
+.spacehead{display:flex;flex-direction:column;gap:6px;margin-bottom:22px}
+.scrolltabs{overflow-x:auto;scrollbar-width:none;margin-bottom:0}
+.scrolltabs button{white-space:nowrap;font-size:14px}
+.emptymap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:24px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.tile{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px}
+.tile b{display:block;font-size:24px;font-variant-numeric:tabular-nums}
+.tile span{font-size:12.5px;color:var(--muted)}
+.progrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.progrid .card{display:flex;flex-direction:column;gap:12px}
+.bars{display:flex;align-items:flex-end;gap:5px;height:150px;padding-top:14px}
+.barcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px;min-width:0}
+.barcol i{display:block;width:100%;max-width:22px;background:var(--primary);border-radius:4px 4px 0 0;min-height:2px}
+.barcol small{font-size:10.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+.barcol .bv{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.lvbars{display:flex;flex-direction:column;gap:8px}
+.lvrow{display:grid;grid-template-columns:62px 1fr 28px;gap:10px;align-items:center;font-variant-numeric:tabular-nums}
+.lvbar{height:10px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.lvbar i{display:block;height:100%;background:var(--accent);border-radius:5px}
+@media (max-width:760px){.progrid{grid-template-columns:1fr}}
 /* map */
 .map-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .map-top h1{font-size:22px}
@@ -1019,6 +1142,7 @@ function loadCustom(docs){
     if(d&&d.kind==='course'&&d.node&&Array.isArray(d.chapters)) COURSES[d.node]={...d,docId:k};
     if(d&&d.kind==='lesson'&&d.node&&d.ch) LESSONS[d.node+'/'+d.ch]={...d,docId:k};
     if(d&&d.kind==='qa'&&d.qa&&!QAS.some(x=>x.docId===k)) QAS.push({...d.qa,docId:k});
+    loadExtra(k,d);
   });
 }
 function removeCustomNode(id){
@@ -1246,11 +1370,12 @@ const IC = {
   map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="7" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7.3 7.2 10.6 16M17.6 9.1l-4.3 6.9M7.5 6.1l9 .7"/></svg>',
   think:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1.1 1.3 1.1 2.2h5c0-.9.5-1.7 1.1-2.2A6 6 0 0 0 12 3z"/></svg>',
   notes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M8.5 13h7M8.5 17h5"/></svg>',
+  space:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><circle cx="17.25" cy="17.25" r="3.75"/></svg>',
   me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
 };
-const NAV=[['home','Home','홈'],['explore','Explore','탐색'],['map','Knowledge Map','지도'],['think','Think','사고'],['notes','My Notes','노트'],['me','My Knowledge','내 지식']];
+const NAV=[['home','Home','홈'],['explore','Explore','탐색'],['map','Knowledge Map','지도'],['think','Think','사고'],['space','My Space','내 공간']];
 function renderNav(){
-  const active = state.view==='detail'?'explore':state.view==='scenario'?'think':state.view==='deep'?'explore':state.view;
+  const active = state.view==='detail'?'explore':(state.view==='scenario'||state.view==='thinkopen')?'think':state.view==='deep'?'explore':state.view;
   $('#sidenav').innerHTML=NAV.map(([v,l])=>`<button class="navitem ${active===v?'on':''}" data-nav="${v}">${IC[v]}${l}</button>`).join('');
   $('#bottomnav').innerHTML=NAV.map(([v,,k])=>`<button class="${active===v?'on':''}" data-nav="${v}">${IC[v]}${k}</button>`).join('');
   const tr=TRAIL.filter(has);
@@ -1262,6 +1387,8 @@ let state={view:'home'};
 let graph=null;
 function go(view,params={}){
   if(graph){graph.destroy();graph=null}
+  if(view==='me'){view='space';params={...params,tab:'knowledge'}}
+  if(view==='notes'){view='space';params={...params,tab:params.tab||'notes'}}
   state={view,...params}; EDIT_INS=null;
   if(view==='detail'){ TRAIL=TRAIL.filter(x=>x!==params.id); TRAIL.push(params.id); if(TRAIL.length>8)TRAIL.shift(); store.set('trail',TRAIL); }
   render(); window.scrollTo(0,0);
@@ -1269,7 +1396,7 @@ function go(view,params={}){
 function render(){
   renderNav();
   const m=$('#main');
-  const V={deep:viewDeep,home:viewHome,explore:viewExplore,detail:viewDetail,map:viewMap,think:viewThink,scenario:viewScenario,me:viewMe,notes:viewNotes}[state.view]||viewHome;
+  const V={space:viewSpace,thinkopen:viewThinkOpen,deep:viewDeep,home:viewHome,explore:viewExplore,detail:viewDetail,map:viewMap,think:viewThink,scenario:viewScenario,me:viewMe,notes:viewNotes}[state.view]||viewHome;
   m.innerHTML = topbar()+V();
   after[state.view]&&after[state.view]();
   clearInterval(genTick);
@@ -1292,7 +1419,7 @@ document.addEventListener('click',e=>{
 });
 
 /* ===================== HOME ===================== */
-function viewHome(){
+function viewHomeOld(){
   const recent=TRAIL.filter(has).slice(-4).reverse();
   const mine=NODES.filter(n=>n.ai).sort((a,b)=>String(b.created||'').localeCompare(String(a.created||''))).slice(0,6);
   const journey=[['http','HTTP를 공부하다가','요청은 어떻게 상대에게 전달되지?'],['tcp','TCP를 열어봄','전송 계층에서 빠짐없이 전달하는 역할이구나'],['network','Network를 열어봄','그럼 이름은 누가 주소로 바꾸지?'],['dns','DNS에 도착','웹사이트에 접속할 때 이런 과정이 일어나는구나']];
@@ -1391,7 +1518,7 @@ after.explore=()=>{
 const STEPS=[['WHAT','이게 뭐지?'],['WHY','왜 필요한데?'],['CONNECTION','뭐랑 연결되어 있는데?'],['THINK','문제가 생기면 어떻게 되는데?']];
 function relRow(x,dirLabel){
   const n=byId[x.id];
-  return `<div class="branch"><button class="nlink" data-open="${x.id}">${esc(n.name)}</button><span class="reltype">${x.e.type}</span><button class="why-btn" data-why="${x.e.i}" aria-expanded="false">왜?</button>${x.e.user?`<span class="tag ai" style="font-size:11px">내 연결</span><button class="why-btn" data-deledge="${x.e.docId}">삭제</button>`:''}</div>`;
+  return `<div class="branch"><button class="nlink" data-open="${x.id}">${esc(n.name)}</button><span class="reltype">${x.e.type}</span><button class="why-btn" data-why="${x.e.i}" aria-expanded="false">왜?</button>${x.e.user?`<span class="tag ai" style="font-size:11px">${x.e.origin==='ai'?'추천 승인':'내 연결'}</span><button class="why-btn" data-deledge="${x.e.docId}">삭제</button>`:''}</div>`;
 }
 function treeBlock(rootName,arr,limit=5){
   if(!arr.length) return '<p class="muted" style="font-size:14px">아직 연결된 개념이 없습니다.</p>';
@@ -1411,13 +1538,16 @@ function viewDetail(){
      <div class="conn-group"><h4>이것을 이해하려면</h4>${treeBlock(n.name,pre)}</div>
      <div class="conn-group"><h4>이것을 이해하면</h4>${treeBlock(n.name,nx)}</div>
      ${rel.length?`<div class="conn-group"><h4>함께 쓰이거나 영향을 주고받는 것</h4>${treeBlock(n.name,rel,4)}</div>`:''}
+     ${myConnBlock(n)}
      ${state.addEdge?edgeForm(n):''}
      <div style="display:flex;gap:8px;flex-wrap:wrap">${state.addEdge?'':`<button class="btn sm" id="addEdgeBtn">+ 내가 아는 연결 추가</button>`}<button class="btn sm" data-mapfocus="${n.id}">${IC.map.replace('<svg','<svg width="16" height="16"')}지도에서 연결 보기</button></div></div>`);
   blocks.push(`<div class="body thinkbox"><p class="tq">${esc(n.think.q)}</p>
      <textarea id="note" placeholder="정답을 보기 전에 내 생각을 먼저 적어보세요. (이 브라우저에만 저장됩니다)">${esc(NOTES[n.id]||'')}</textarea>
-     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" id="hintBtn">힌트 보기</button><button class="btn sm primary" id="ansBtn">해설 보기</button></div>
-     <div id="hintBox" class="reveal hint" hidden><b>힌트</b> · ${esc(n.think.hint)}</div>
-     <div id="ansBox" class="reveal ans" hidden><b>해설</b> · ${esc(n.think.a)}</div>
+     <div class="tiers"><button class="btn sm" id="hintBtn">💡 힌트</button><button class="btn sm" id="moreBtn" ${AIB?'disabled':''}>🤔 조금 더 생각하기</button><button class="btn sm primary" id="ansBtn">🔓 정답 보기</button></div>
+     <div id="hintBox" class="reveal hint" ${state.hintShown?'':'hidden'}><b>💡 힌트</b> · ${esc(n.think.hint)}</div>
+     ${socHTML(n)}
+     <div id="moreBox" class="reveal more" hidden><b>🤔 조금 더 생각하기</b><ul style="margin:6px 0 0;padding-left:20px"><li>이 상황에서 가장 먼저 영향을 받는 구성요소는 무엇일까요?</li><li>그다음 연쇄적으로 영향을 받는 것은 무엇일까요?</li><li>사용자는 어떤 증상을 보게 될까요? 그 증상으로 원인 범위를 어떻게 좁힐 수 있을까요?</li></ul></div>
+     <div id="ansBox" class="reveal ans" ${state.ansShown?'':'hidden'}><b>🔓 정답</b> · ${esc(n.think.a)}</div>
      ${relScen.length?`<div><span class="label">이 개념이 등장하는 사고 문제</span><div class="chips" style="margin-top:8px">${relScen.map(s=>`<button class="chip" data-scen="${s.id}">${esc(s.kindLabel)} · ${esc(s.title)}</button>`).join('')}</div></div>`:''}
      </div>`);
   const nextLabels=['왜 필요한데?','뭐랑 연결되어 있는데?','문제가 생기면 어떻게 되는데?'];
@@ -1439,13 +1569,16 @@ function viewDetail(){
       <div class="steps-nav">${STEPS.map((s,i)=>`<button class="${i<step?'done':''} ${i===step?'cur':''} ${i>step?'locked':''}" ${i<=step?`data-scrollto="${i}"`:'disabled'}><b>${i+1}</b>${s[0]}</button>`).join('')}</div>
       ${shown}
       ${step>=3?`<div class="oneliner"><span class="label">한 줄 요약</span>${esc(n.one)}</div>`:''}
+      ${undSection(n)}
       ${deepCTA(n)}
       ${insightSection(n)}
     </div>
     <aside class="side">
       ${deepSide(n)}
       <div class="card minimap-card"><div class="head"><span class="label">Knowledge Map</span><button class="btn ghost sm" data-mapfocus="${n.id}">크게 보기</button></div>${egoMap(n.id)}</div>
-      <div class="card" style="padding:16px"><span class="label">내 이해도</span><div class="statuspick" style="margin-top:10px">${['known','learning','weak','none'].map(k=>`<button class="${st===k?'on':''}" data-status="${k}"><span class="dot s-${k}"></span>${ST_LABEL[k]}</button>`).join('')}</div></div>
+      <div class="card" style="padding:16px"><span class="label">내 이해도</span><div class="statuspick" style="margin-top:10px">${['known','learning','weak','none'].map(k=>`<button class="${st===k?'on':''}" data-status="${k}"><span class="dot s-${k}"></span>${ST_LABEL[k]}</button>`).join('')}</div>
+        <div class="lvline">${lvBadge(n.id)}<button class="linkbtn" data-und="${n.id}">내 말로 설명하기 →</button></div>
+        ${openGaps().filter(g=>g.node===n.id).length?`<div class="sidegaps"><span class="label">🕳️ 이 개념의 지식 공백</span>${openGaps().filter(g=>g.node===n.id).slice(0,3).map(g=>`<button class="linkbtn" data-space="gaps">· ${esc(g.text)}</button>`).join('')}</div>`:''}</div>
       ${(st==='learning'||st==='known')&&weakPre.length?`<div class="warnitem"><span class="mk">!</span><div>${esc(n.name)}를 공부하고 있지만 <b>${weakPre.map(m=>esc(m.name)).join(', ')}</b> 개념이 약합니다. <button class="why-btn" data-open="${weakPre[0].id}" style="margin-top:6px">${esc(weakPre[0].name)}부터 보기</button></div></div>`:''}
       ${n.ai&&n.suggest&&n.suggest.length?`<div class="card" style="padding:16px"><span class="label">이어서 배우면 좋은 개념</span><p class="muted" style="font-size:12.5px;margin:4px 0 10px">지도에 없는 개념은 누르면 AI가 만들어 연결합니다.</p><div class="chips">${n.suggest.map(sg=>{const ex=NODES.find(m=>m.name.toLowerCase()===sg.toLowerCase());return ex?nodeChip(ex.id):`<button class="chip" data-gen="${esc(sg)}">+ ${esc(sg)}</button>`}).join('')}</div></div>`:''}
       ${recommend?`<div class="card" style="padding:16px"><span class="label">다음에 탐색해 볼 개념</span><button class="ritem" data-open="${recommend.id}" style="margin-top:6px;padding:8px 0"><span class="rname">${esc(recommend.name)}</span><span class="rsum">${esc(recommend.summary)}</span></button></div>`:''}
@@ -1480,8 +1613,22 @@ after.detail=()=>{
   $$('[data-status]').forEach(b=>b.addEventListener('click',()=>{setStatus(n.id,b.dataset.status);render()}));
   const note=$('#note'); if(note) note.addEventListener('input',()=>{NOTES[n.id]=note.value;saveNotes()});
   const del=$('#delNode'); if(del) del.addEventListener('click',()=>{ if(del.dataset.armed){removeCustomNode(n.id);toast(`${n.name}을(를) 지도에서 삭제했어요.`);go('explore')} else {del.dataset.armed='1';del.textContent='한 번 더 누르면 삭제됩니다';del.style.color='var(--err-text)'} });
-  $('#hintBtn')?.addEventListener('click',()=>{$('#hintBox').hidden=false});
-  $('#ansBtn')?.addEventListener('click',()=>{$('#ansBox').hidden=false});
+  $('#hintBtn')?.addEventListener('click',()=>{state.hintShown=true;$('#hintBox').hidden=false});
+  $('#ansBtn')?.addEventListener('click',()=>{state.ansShown=true;$('#ansBox').hidden=false});
+  $('#moreBtn')?.addEventListener('click',()=>{ if(!CLOUD.sample){$('#moreBox').hidden=false;return} const d=($('#note')?.value||'').trim(); runAI('soc:'+n.id,s=>socratic(n,d,s)) });
+  const uf=$('#undForm'); if(uf){
+    uf.addEventListener('input',e=>{const t=e.target.closest('[data-uf]');if(t){(UDRAFT[n.id]=UDRAFT[n.id]||{...(UND[n.id]?UND[n.id].fields:{})})[t.dataset.uf]=t.value}});
+    uf.addEventListener('submit',e=>{e.preventDefault();const f={};$$('[data-uf]').forEach(t=>f[t.dataset.uf]=t.value.trim());if(!Object.values(f).some(Boolean)){toast('한 칸 이상 써 주세요.');return}
+      const c=saveUnd(n,f);UDRAFT[n.id]=null;state.undEdit=false;state.prefill=null;toast(c?`저장했어요. '아직 모르는 것'에서 지식 공백 ${c}개를 등록했어요.`:'저장했어요.');rerender()});
+  }
+  $('#undCancel')?.addEventListener('click',()=>{UDRAFT[n.id]=null;state.undEdit=false;state.prefill=null;rerender()});
+  $('#undEdit')?.addEventListener('click',()=>{state.undEdit=true;rerender();$('#und')?.scrollIntoView({block:'start'})});
+  $('#undFb')?.addEventListener('click',()=>runAI('und:'+n.id,s=>undFeedback(n,s)));
+  $('#pfClose')?.addEventListener('click',()=>{state.prefill=null;rerender()});
+  $('#pfPaste')?.addEventListener('click',()=>{const pre=INSIGHTS.find(i=>i.docId===state.prefill);if(!pre)return;const k=$('#pfField').value;const d=UDRAFT[n.id]||(UDRAFT[n.id]={...(UND[n.id]?UND[n.id].fields:{})});d[k]=(d[k]?d[k]+'\n':'')+pre.text;state.prefill=null;rerender()});
+  $('#pfAI')?.addEventListener('click',()=>{const pre=INSIGHTS.find(i=>i.docId===state.prefill);if(pre)runAI('pf:'+n.id,s=>prefillAI(n,pre.text,s))});
+  $('#sgBtn')?.addEventListener('click',()=>runAI('sg:'+n.id,s=>suggestConn(n,s)));
+  if(state.scrollUnd){state.scrollUnd=false;setTimeout(()=>$('#und')?.scrollIntoView({block:'start'}),60)}
 };
 
 /* ===================== FORCE GRAPH ===================== */
@@ -1620,13 +1767,17 @@ after.map=()=>{
 /* ===================== THINK list ===================== */
 function viewThink(){
   return `<div class="wrap"><div class="page-h"><span class="eyebrow">Think</span><h1>정답보다 사고 과정</h1><p class="muted" style="max-width:60ch">실제 장애 상황처럼 단서를 하나씩 확인하며 원인을 좁혀갑니다. 틀린 선택도 기록되고, 왜 그 방향이 아닌지 알려줍니다.</p></div>
+  ${openThinkSection()}
+  <h2 class="sub" style="margin-top:28px">🧩 단계형 사고 문제</h2>
   ${CLOUD.sample?`<form class="card" id="scenForm" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"><label for="scenQ" class="label" style="color:var(--accent)">내 상황으로 사고 문제 만들기</label><div class="searchbar" style="box-shadow:none">${IC.think}<input id="scenQ" placeholder="예: 배포 후 로그인만 안 돼요, Redis 메모리가 계속 늘어나요" autocomplete="off" value="${GEN&&GEN.kind==='scenario'?esc(GEN.q):''}"><button class="btn primary" ${GEN&&GEN.busy?'disabled':''}>만들기</button></div>${GEN&&GEN.kind==='scenario'?genPanel('scenario',GEN.q):''}</form>`:''}
   <div class="thinklist">${SCENARIOS.map(s=>`<button class="card scard" data-scen="${s.id}"><span class="kind">${esc(s.kindLabel).toUpperCase()}${s.ai?' · AI 생성':''}</span><h3>${esc(s.title)}</h3><p>${esc(s.teaser)}</p><div class="chips" style="gap:6px">${s.related.filter(has).slice(0,4).map(id=>`<span class="tag">${esc(byId[id].name)}</span>`).join('')}</div></button>`).join('')}</div>
   <div class="card" style="margin-top:20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:space-between"><div><span class="label">사고 문제가 기르는 3가지 습관</span><p style="margin-top:6px">요청 경로를 <b>앞에서부터</b> 따라가기 · 후보를 <b>계층별로</b> 펼치기 · 의존 관계를 <b>거꾸로</b> 따라가 영향 범위 찾기</p></div></div>
   </div>`;
 }
 
-after.think=()=>{ $('#scenForm')?.addEventListener('submit',e=>{e.preventDefault();startGen('scenario',$('#scenQ').value)}); };
+after.think=()=>{ $('#scenForm')?.addEventListener('submit',e=>{e.preventDefault();startGen('scenario',$('#scenQ').value)});
+  $('#otNew')?.addEventListener('submit',e=>{e.preventDefault();const s=$('#otText').value.trim();if(s.length<5){$('#otText').focus();return}
+    const id='c'+Date.now().toString(36);THINKS[id]={docId:'th-'+id,kind:'th',id,title:s.slice(0,60),situation:s,answers:{},rounds:[],created:new Date().toISOString()};saveDoc(THINKS[id]);go('thinkopen',{id})}); };
 /* ===================== SCENARIO ===================== */
 let G=null; // game state
 function viewScenario(){
@@ -1800,7 +1951,7 @@ function addInsight({node,pending,text,raw,source,check}){
 }
 function addUserEdge(e){
   const docId='ue-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
-  const edge={s:e.s,t:e.t,type:e.type,why:e.why||'',sr:e.sr||'',tr:e.tr||''};
+  const edge={s:e.s,t:e.t,type:e.type,why:e.why||'',sr:e.sr||'',tr:e.tr||'',origin:e.origin||'me',created:new Date().toISOString()};
   EDGES.push({...edge,i:EDGES.length,user:true,docId}); persist(docId,{kind:'edge',edge});
 }
 function deleteUserEdge(docId){const keep=EDGES.filter(e=>e.docId!==docId);EDGES.length=0;keep.forEach((e,i)=>EDGES.push({...e,i}));persist(docId,null)}
@@ -1814,7 +1965,7 @@ function insItem(i,opts={}){
     ${i.check?`<div class="reveal hint" style="font-size:13.5px"><b>확인해 볼 점</b> · ${esc(i.check)}</div>`:''}
     ${i.raw?`<details class="raw"><summary>내가 적은 원문</summary><p>${esc(i.raw)}</p></details>`:''}
     ${opts.unfiled?`<div class="caprow">${i.pending&&CLOUD.sample?`<button class="btn sm" data-gen="${esc(i.pending)}">"${esc(i.pending)}" 개념 만들고 연결</button>`:''}<select class="fld" data-insfile="${i.docId}" aria-label="개념에 넣기"><option value="">개념에 넣기…</option>${sortedNodes().map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select></div>`:''}
-    <div class="insmeta"><span>${fmtDate(i.created)}${i.edited?' (수정됨)':''}${i.source?' · '+esc(i.source):''}</span><span class="insact"><button class="linkbtn" data-insedit="${i.docId}">수정</button><button class="linkbtn" data-insdel="${i.docId}">삭제</button></span></div></div>`;
+    <div class="insmeta"><span>${fmtDate(i.created)}${i.edited?' (수정됨)':''}${i.source?' · '+esc(i.source):''}</span><span class="insact">${i.node?`<button class="linkbtn" data-ins2und="${i.docId}">Deep으로 정리</button>`:''}<button class="linkbtn" data-ins2gap="${i.docId}">공백으로 등록</button><button class="linkbtn" data-insedit="${i.docId}">수정</button><button class="linkbtn" data-insdel="${i.docId}">삭제</button></span></div></div>`;
 }
 function captureForm(where,nodeId){
   if(ORG&&ORG.where===where&&ORG.nodeId===nodeId&&(ORG.busy||ORG.error||ORG.result)) return orgPanel();
@@ -1967,7 +2118,7 @@ function chatFromHistory(nodeId){
   const turns=[]; list.forEach(x=>{turns.push({role:'user',content:x.q,ch:x.chTitle,past:true,qaId:x.docId});turns.push({role:'assistant',content:x.a,qaId:x.docId,past:true})});
   return {turns,mode:'explain'};
 }
-function notesTabs(cur){
+function notesTabs(cur){ return '';
   return `<div class="tabs" role="tablist"><button role="tab" aria-selected="${cur==='notes'}" class="${cur==='notes'?'on':''}" data-ntab="notes">내 노트 <span>${INSIGHTS.length}</span></button><button role="tab" aria-selected="${cur==='qa'}" class="${cur==='qa'?'on':''}" data-ntab="qa">질문 기록 <span>${QAS.length}</span></button></div>`;
 }
 let QAF={q:'',star:false,node:''};
@@ -1998,7 +2149,7 @@ function qaItem(x){
   const n=byId[x.node];
   return `<article class="qaitem ${x.star?'starred':''}">
     <div class="qahead"><button class="starbtn ${x.star?'on':''}" data-qastar="${x.docId}" aria-pressed="${x.star}" title="${x.star?'별표 해제':'별표'}">${x.star?'★':'☆'}</button>
-      <div style="min-width:0;flex:1"><p class="qaq">${esc(x.q)}</p><div class="qameta">${n?`<button class="nlink" data-open="${n.id}" style="font-weight:500">${esc(n.name)}</button>`:'<span>삭제된 개념</span>'}${x.chTitle?` · ${esc(x.chTitle)}`:''} · ${x.mode==='socratic'?'질문으로 이끌기':'설명해 주기'} · ${new Date(x.created).toTimeString().slice(0,5)}</div></div></div>
+      <div style="min-width:0;flex:1"><p class="qaq">${esc(x.q)}</p><div class="qameta">${n?`<button class="nlink" data-open="${n.id}" style="font-weight:500">${esc(n.name)}</button>`:(x.node?'<span>삭제된 개념</span>':'<span>지식 공백 질문</span>')}${x.chTitle?` · ${esc(x.chTitle)}`:''} · ${x.mode==='socratic'?'질문으로 이끌기':'설명해 주기'} · ${new Date(x.created).toTimeString().slice(0,5)}</div></div></div>
     <details class="qaans"><summary>답 보기</summary><div class="md">${md(x.a,x.node)}</div></details>
     <div class="qaact">${n&&COURSES[x.node]?`<button class="linkbtn" data-qago="${x.docId}">이어서 질문하기 →</button>`:''}<button class="linkbtn" data-qanote="${x.docId}">노트로 저장</button><button class="linkbtn" data-qadel="${x.docId}">삭제</button></div>
   </article>`;
@@ -2452,6 +2603,526 @@ after.deep=()=>{
   if(state.scrollTutor){state.scrollTutor=false;setTimeout(()=>$('#tutor')?.scrollIntoView({block:'start'}),50)}
   $$('[data-savechat]').forEach(b=>b.addEventListener('click',()=>{const t=chat().turns,k=+b.dataset.savechat;const q=t[k-1]&&t[k-1].role==='user'?t[k-1].content:'';
     addInsight({node:n.id,text:t[k].content.replace(/\[\[([^\]]+)\]\]/g,'$1'),raw:'',source:`튜터 Q&A · ${cur.title}${q?' — Q: '+q.slice(0,80):''}`});b.textContent='노트에 저장됨';b.disabled=true}));
+};
+
+/* ===================== LEARNING SYSTEM: understanding · connections · gaps · review · open think · My Space ===================== */
+const UND={}; let GAPS=[]; const SUGG={}; let REVIEWS=[]; const THINKS={};
+const UDRAFT={}, RVD={};
+const SOC={}; // concept THINK step socratic turns
+let GAPSUG=null; const GAPAI={};
+let AIB=null; // single AI job {key,busy,ctl,text}
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const strip=o=>{const {docId,_new,...r}=o;return r};
+const saveDoc=o=>persist(o.docId,strip(o));
+const nowISO=()=>new Date().toISOString();
+const byNewest=k=>(a,b)=>String(b[k]).localeCompare(String(a[k]));
+const arrOf=v=>Array.isArray(v)?v:[];
+const strs=(v,n,max)=>arrOf(v).map(x=>str(typeof x==='string'?x:'',max||200)).filter(Boolean).slice(0,n);
+
+function loadExtra(k,d){
+  if(!d||!d.kind) return;
+  if(d.kind==='und'&&d.node) UND[d.node]={...d,docId:k};
+  else if(d.kind==='gap'&&!GAPS.some(g=>g.docId===k)) GAPS.push({...d,docId:k});
+  else if(d.kind==='sg'&&d.node) SUGG[d.node]={...d,docId:k};
+  else if(d.kind==='rv'&&!REVIEWS.some(r=>r.docId===k)) REVIEWS.push({...d,docId:k});
+  else if(d.kind==='th'&&d.id) THINKS[d.id]={...d,docId:k};
+}
+
+/* ---------- level ---------- */
+function lastReview(id){return REVIEWS.filter(r=>r.node===id).sort(byNewest('at'))[0]}
+function levelOf(id){
+  const r=REVIEWS.filter(x=>x.node===id&&x.fb&&x.fb.score).sort(byNewest('at'))[0]; if(r) return r.fb.score;
+  const u=UND[id]; if(u&&u.fb&&u.fb.level) return u.fb.level;
+  return {known:3,learning:2,weak:1}[STATUS[id]]||0;
+}
+function lvBadge(id){const l=levelOf(id);return `<span class="lv lv${l}" title="이해도 레벨 (복습·이해도 피드백 기준)">이해도 Lv.${l}</span>`}
+
+/* ---------- AI job runner ---------- */
+function aiBusy(msg){return `<div class="aicard busy" aria-live="polite"><div class="aitext"><span class="label" style="color:var(--accent)">AI 분석 중</span><b>${esc(msg)}</b><span class="muted" style="font-size:12.5px">보통 10~40초 걸려요</span><div class="pbar"><i></i></div></div><button class="btn sm" data-aicancel>취소</button></div>`}
+async function runAI(key,fn,okMsg){
+  if(!CLOUD.sample){toast('AI 기능은 로그인한 상태에서 쓸 수 있어요.');return}
+  if(AIB&&AIB.busy){toast('다른 AI 작업이 끝나면 다시 눌러 주세요.');return}
+  const at={view:state.view,id:state.id,tab:state.tab};
+  AIB={key,busy:true,ctl:new AbortController(),text:''}; rerender();
+  let ok=false;
+  try{ await fn(AIB.ctl.signal); ok=true }catch(e){ if(!(e&&e.code==='cancelled')) toast(genErr(e&&e.code)) }
+  AIB=null;
+  const same=state.view===at.view&&state.id===at.id&&state.tab===at.tab;
+  if(same) rerender(); else if(ok&&okMsg) toast(okMsg);
+  if(ok&&okMsg&&same) toast(okMsg);
+}
+const aj=(prompt,signal)=>CLOUD.sample.json(prompt,{signal,modelTier:'default'});
+
+/* ---------- gaps ---------- */
+const GAP_SRC={manual:'직접 추가',ai:'AI가 발견',und:'내 설명에서',note:'노트에서',review:'복습에서',think:'사고 훈련에서',fb:'AI 피드백에서'};
+const openGaps=()=>GAPS.filter(g=>!g.done);
+function addGap({text,node,source,why}){
+  text=String(text||'').trim(); if(text.length<2) return null;
+  if(GAPS.some(g=>!g.done&&g.text===text)) return null;
+  const g={docId:uid('g-'),kind:'gap',text:text.slice(0,300),node:has(node)?node:null,source:source||'manual',why:why||'',done:false,created:nowISO()};
+  GAPS.push(g); saveDoc(g); return g;
+}
+function gapChips(list,node,source){
+  if(!list||!list.length) return '';
+  return `<div><span class="label">지식 공백 후보</span><div class="chips" style="margin-top:8px">${list.map(t=>{const added=GAPS.some(g=>g.text===t);return `<button class="chip gapchip" data-addgap="${esc(t)}" data-gapnode="${node||''}" data-gapsrc="${source||'fb'}" ${added?'disabled':''}>${added?'✓ ':'+ '}${esc(t)}</button>`}).join('')}</div></div>`;
+}
+
+/* ---------- My Understanding (Deep Understanding) ---------- */
+const UF=[['what','무엇인가?','처음 듣는 사람에게 설명하듯 한두 문장으로'],['why','왜 필요한가?','이게 없으면 어떤 문제가 생기나요?'],['how','어떻게 동작하는가?','안에서 실제로 무슨 일이 일어나나요? (단계, 구성요소, 데이터 흐름)'],['conn','무엇과 연결되는가?','어떤 개념 위에 있고, 무엇과 함께 쓰이나요?'],['trouble','문제가 생기면?','어떤 증상이 나타나고 무엇이 영향을 받나요?'],['unknown','아직 모르는 것은?','한 줄에 하나씩 적으면 지식 공백으로 등록돼요']];
+function saveUnd(n,fields){
+  const prev=UND[n.id]; const u=prev?{...prev}:{docId:'u-'+n.id,kind:'und',node:n.id,history:[],created:nowISO()};
+  if(prev&&prev.fields&&JSON.stringify(prev.fields)!==JSON.stringify(fields)){ u.history=[...(prev.history||[]),{at:prev.updated,fields:prev.fields,fb:prev.fb||null}].slice(-10); u.fb=null; }
+  u.fields=fields; u.updated=nowISO(); UND[n.id]=u; saveDoc(u);
+  let c=0; String(fields.unknown||'').split('\n').map(s=>s.replace(/^[\s\-*•\d.)]+/,'').trim()).filter(s=>s.length>=3).forEach(t=>{if(addGap({text:t,node:n.id,source:'und'}))c++});
+  if(!STATUS[n.id]) setStatus(n.id,'learning');
+  return c;
+}
+function fbHTML(fb,node,title){
+  const L=(h,arr,cls,sign)=>arr&&arr.length?`<div class="fbgrp ${cls}"><b>${h}</b><ul>${arr.map(x=>`<li><span class="sign">${sign}</span>${esc(x)}</li>`).join('')}</ul></div>`:'';
+  return `<div class="fb-card"><div class="fbhead"><span class="label">${title||'AI 이해도 피드백'}</span>${fb.level||fb.score?`<span class="lv lv${fb.level||fb.score}">Lv.${fb.level||fb.score}</span>`:''}<span class="muted" style="font-size:12px">${fmtDate(fb.at)}</span></div>
+    ${L(fb.improved?'지난번보다 좋아진 부분':'잘 설명한 부분',fb.improved||fb.good,'good','+')}
+    ${L(fb.lacking?'아직 부족한 부분':'빠진 부분',fb.lacking||fb.missing,'miss','−')}
+    ${L('다시 확인할 부분',fb.wrong,'wrong','!')}
+    ${fb.question||fb.next?`<aside class="callout c-key"><span class="clabel">${fb.next?'다음에 할 것':'생각해 볼 질문'}</span><p>${esc(fb.question||fb.next)}</p></aside>`:''}
+    ${gapChips(fb.gaps,node,'fb')}</div>`;
+}
+function undSection(n){
+  const u=UND[n.id]; const editing=state.undEdit||!u;
+  const pre=state.prefill?INSIGHTS.find(i=>i.docId===state.prefill):null;
+  const draft=UDRAFT[n.id]||(u?{...u.fields}:{});
+  const busy=AIB&&AIB.key==='und:'+n.id, pfBusy=AIB&&AIB.key==='pf:'+n.id;
+  let h=`<section class="card und" id="und"><div class="section-title"><h2 style="font-size:18px">🧠 내 말로 설명하기</h2>${u?lvBadge(n.id):''}</div>
+    <p class="muted" style="font-size:13.5px;margin-top:-6px">읽은 내용을 내 말로 다시 써 보면 어디를 모르는지 드러나요. 모르는 칸은 비워 두고, 마지막 칸에 적어 두세요.</p>`;
+  if(editing){
+    if(pre) h+=`<div class="prefill"><span class="label">노트에서 가져온 내용</span><p>${esc(pre.text)}</p>${pfBusy?aiBusy('노트를 6개 항목에 나눠 넣고 있어요'):`<div class="caprow">${CLOUD.sample?`<button class="btn sm primary" id="pfAI">AI로 항목에 나눠 넣기</button>`:''}<select class="fld" id="pfField" aria-label="붙일 칸">${UF.map(f=>`<option value="${f[0]}">${f[1]}</option>`).join('')}</select><button class="btn sm" id="pfPaste">이 칸에 붙이기</button><button class="linkbtn" id="pfClose">닫기</button></div>`}</div>`;
+    h+=`<form id="undForm" class="undform">${UF.map(([k,l,ph])=>`<label class="undf"><span>${l}</span><textarea class="fld" rows="${k==='how'?4:2}" data-uf="${k}" placeholder="${ph}">${esc(draft[k]||'')}</textarea></label>`).join('')}
+      <div class="aibtns"><button class="btn primary sm">저장</button>${u?'<button type="button" class="btn sm" id="undCancel">취소</button>':''}</div></form>`;
+  } else {
+    h+=`<div class="undview">${UF.map(([k,l])=>u.fields[k]?`<div><span class="label">${l}</span><p>${esc(u.fields[k])}</p></div>`:`<div class="empty"><span class="label">${l}</span><p class="muted">비어 있음</p></div>`).join('')}</div>
+      <div class="aibtns"><button class="btn sm" id="undEdit">고쳐 쓰기</button>${CLOUD.sample?`<button class="btn sm primary" id="undFb" ${AIB?'disabled':''}>🧠 AI 이해도 피드백</button>`:''}<span class="muted" style="font-size:12.5px">${fmtDate(u.updated)} 저장${u.history&&u.history.length?` · 고쳐 쓴 횟수 ${u.history.length}`:''}</span></div>`;
+    if(busy) h+=aiBusy('내 설명을 읽고 잘한 점과 빠진 점을 찾고 있어요');
+    if(u.fb) h+=fbHTML(u.fb,n.id);
+  }
+  return h+'</section>';
+}
+async function undFeedback(n,signal){
+  const u=UND[n.id];
+  const prompt=`당신은 IT 튜터이자 학습 분석가입니다. 학습자가 "${n.name}"을(를) 자기 말로 설명했습니다. 정답을 대신 써 주지 말고, 학습자의 설명을 평가하세요.
+(평가 기준 — 학습자에게는 보여주지 않은 참고 정보)
+요약: ${n.summary}
+무엇: ${n.what}
+왜: ${n.why}
+핵심 개념: ${n.concepts.join(', ')}
+연결된 개념: ${[...prereqs(n.id),...related(n.id)].map(x=>byId[x.id].name).join(', ')}
+
+학습자의 설명:
+${UF.map(([k,l])=>`[${l}] ${u.fields[k]||'(비어 있음)'}`).join('\n')}
+
+규칙:
+- good: 정확하게 설명한 점 1~3개. 학습자의 문장을 구체적으로 짚으세요.
+- missing: 빠진 핵심 1~3개. 답을 알려주지 말고 '무엇이 빠졌는지'만. (예: "TCP가 순서를 어떻게 보장하는지 설명이 없음")
+- wrong: 사실과 다른 부분 0~2개. 왜 틀렸는지 힌트만.
+- question: 스스로 생각해 볼 꼬리 질문 1개.
+- gaps: 학습자가 모르는 것으로 보이는 주제 0~3개 (짧은 질문형, 예: "TCP 재전송은 언제 일어나는가").
+- level: 1~5 (1 거의 설명 못함 / 3 핵심은 알지만 동작 원리 부족 / 5 원리·연결·문제 상황까지 설명)
+JSON만: {"level":3,"good":[],"missing":[],"wrong":[],"question":"","gaps":[]}`;
+  const r=await aj(prompt,signal);
+  const fb={level:Math.min(5,Math.max(1,Math.round(+r.level||2))),good:strs(r.good,3),missing:strs(r.missing,3),wrong:strs(r.wrong,2),question:str(r.question,300),gaps:strs(r.gaps,3,120),at:nowISO()};
+  const cur=UND[n.id]; cur.fb=fb; saveDoc(cur);
+}
+async function prefillAI(n,note,signal){
+  const d=UDRAFT[n.id]||(UND[n.id]?{...UND[n.id].fields}:{});
+  const prompt=`학습자의 "${n.name}" 정리 노트를 6개 항목에 나눠 넣어 주세요 (정리 보조). 학습자가 쓴 내용만 사용하고, 새로운 사실을 지어내지 마세요. 기존 내용은 유지하고 새 노트 내용을 알맞은 항목에 덧붙이세요. 해당 없는 항목은 기존 그대로.
+기존 정리:
+${UF.map(([k,l])=>`${k} (${l}): ${d[k]||''}`).join('\n')}
+새 노트: ${note}
+JSON만: {"what":"","why":"","how":"","conn":"","trouble":"","unknown":""}`;
+  const r=await aj(prompt,signal);
+  const out={}; UF.forEach(([k])=>{out[k]=str(r[k],2000)||d[k]||''});
+  UDRAFT[n.id]=out; state.prefill=null; state.undEdit=true;
+}
+
+/* ---------- concept THINK step: 3-tier hints with socratic follow-up ---------- */
+function socHTML(n){
+  const t=SOC[n.id]; if(!t||!t.length) return '';
+  const live=AIB&&AIB.key==='soc:'+n.id;
+  return `<div class="socbox">${t.map((x,k)=>x.role==='user'?`<div class="soc me"><span class="label">내 생각</span><p>${esc(x.content)}</p></div>`:`<div class="soc ai"><span class="label">🤔 조금 더 생각하기</span><div class="md" ${live&&k===t.length-1?'id="socLive"':''}>${md(x.content,n.id)||'<p class="muted">생각하는 중…</p>'}</div></div>`).join('')}${live?'<button class="linkbtn" data-aicancel>멈추기</button>':`<p class="muted" style="font-size:12.5px">위 칸에 생각을 고쳐 쓰고 다시 "조금 더 생각하기"를 누르면 대화가 이어져요.</p>`}</div>`;
+}
+async function socratic(n,draft,signal){
+  const t=SOC[n.id]||(SOC[n.id]=[]);
+  t.push({role:'user',content:draft||'(아직 생각을 쓰지 않음)'}); t.push({role:'assistant',content:''});
+  const prompt=`당신은 소크라테스식 IT 튜터입니다. 정답을 말하지 마세요.
+개념: ${n.name}
+질문: ${n.think.q}
+(튜터만 보는 모범 답: ${n.think.a})
+지금까지의 대화:
+${t.slice(0,-1).map(x=>(x.role==='user'?'학습자: ':'튜터: ')+x.content).join('\n')}
+할 일: 학습자 생각에서 맞는 부분이 있으면 1문장으로 인정하고, 답에 가까워지도록 꼬리 질문 1~2개를 하세요. 크게 벗어났다면 어느 계층·구성요소를 생각해 보라고 방향만 주세요. 학습자가 아직 아무것도 쓰지 않았다면 생각을 여는 쉬운 하위 질문 2개를 주세요. 3~5문장, 한국어, 모범 답 문장을 그대로 말하지 말 것.`;
+  const {text}=await CLOUD.sample(prompt,{signal,cache:false,modelTier:'default',onText:({text})=>{t[t.length-1].content=text;const el=$('#socLive');if(el)el.innerHTML=md(text,n.id)}});
+  t[t.length-1].content=text;
+}
+
+/* ---------- connections: My Connection vs Suggested ---------- */
+function myConnBlock(n){
+  const mine=EDGES.filter(e=>e.user&&(e.s===n.id||e.t===n.id));
+  const sg=SUGG[n.id]; const busy=AIB&&AIB.key==='sg:'+n.id;
+  const pend=sg?sg.items.map((x,i)=>({...x,i})).filter(x=>x.state==='pending'&&has(x.s)&&has(x.t)):[];
+  return `<div class="myconn">
+    <div class="conn-group"><h4>🔗 My Connection</h4>${mine.length?mine.map(e=>`<div class="mcitem ${e.origin==='ai'?'fromai':''}"><div><b>${esc(byId[e.s].name)}</b> <span class="reltype">${e.type}</span> <b>${esc(byId[e.t].name)}</b>${e.origin==='ai'?' <span class="tag" style="font-size:11px">AI 추천 → 내가 승인</span>':''}</div><p><span class="muted">${e.origin==='ai'?'추천 이유':'내가 생각한 이유'}:</span> ${esc(e.why||'(적지 않음)')}</p></div>`).join(''):'<p class="muted" style="font-size:13.5px">아직 내가 만든 연결이 없어요. 아래에서 직접 추가하거나 AI 추천을 받아 보세요.</p>'}</div>
+    <div class="conn-group"><h4>🤖 Suggested Connection</h4>
+      ${pend.map(x=>`<div class="sgitem"><div><b>${esc(byId[x.s].name)}</b> <span class="reltype">${x.type}</span> <b>${esc(byId[x.t].name)}</b></div><p class="muted">${esc(x.why)}</p><div class="aibtns"><button class="btn sm primary" data-sgadd="${n.id}|${x.i}">내 지식에 추가</button><button class="linkbtn" data-sgno="${n.id}|${x.i}">무시</button></div></div>`).join('')}
+      ${busy?aiBusy('지도와 내 기록을 보고 함께 알면 좋은 연결을 찾고 있어요'):CLOUD.sample?`<div><button class="btn sm" id="sgBtn" ${AIB?'disabled':''}>${pend.length?'다른 연결 더 추천 받기':'AI 연결 추천 받기'}</button><span class="muted" style="font-size:12.5px;margin-left:8px">추천은 내가 승인해야 내 지식 그래프에 들어가요</span></div>`:''}
+    </div></div>`;
+}
+async function suggestConn(n,signal){
+  const ex=EDGES.filter(e=>e.s===n.id||e.t===n.id).map(e=>`${byId[e.s].name} ${e.type} ${byId[e.t].name}`).join('\n');
+  const prev=(SUGG[n.id]?SUGG[n.id].items:[]).map(x=>`${x.s}->${x.t}`).join(', ');
+  const prompt=`당신은 IT 학습 추천자입니다. 학습자가 "${n.name}"을(를) 공부하고 있습니다. 이해를 넓히려면 함께 알아야 하는데 아직 지도에 연결되어 있지 않은 관계를 2~4개 추천하세요.
+지도 개념 (id: 이름): ${NODES.map(m=>m.id+': '+m.name).join(', ')}
+이미 있는 연결:
+${ex||'(없음)'}
+이미 추천했던 것 (제외): ${prev||'없음'}
+학습자가 이해했다고 표시한 개념: ${NODES.filter(m=>STATUS[m.id]==='known').map(m=>m.name).join(', ')||'없음'}
+규칙: 각 관계의 한쪽은 반드시 "${n.id}", 다른 쪽은 위 목록의 id. type은 ${GEN_TYPES.join(', ')} 중 하나 (A depends_on B = A를 이해하려면 B가 필요). why는 "왜 함께 이해하면 좋은지" 1~2문장 (예: "HTTPS를 이해하려면 TLS와의 관계를 함께 이해하는 것이 좋습니다").
+JSON만: {"items":[{"s":"","t":"","type":"","why":""}]}`;
+  const r=await aj(prompt,signal);
+  const items=arrOf(r.items).filter(x=>x&&has(x.s)&&has(x.t)&&x.s!==x.t&&(x.s===n.id||x.t===n.id)&&GEN_TYPES.includes(x.type)&&!EDGES.some(e=>(e.s===x.s&&e.t===x.t)||(e.s===x.t&&e.t===x.s))).slice(0,4).map(x=>({s:x.s,t:x.t,type:x.type,why:str(x.why,300),state:'pending'}));
+  if(!items.length){toast('지금은 새로 추천할 연결이 없어요.');return}
+  const sg=SUGG[n.id]||{docId:'sg-'+n.id,kind:'sg',node:n.id,items:[]};
+  sg.items=[...sg.items.filter(x=>x.state!=='pending'),...items].slice(-30); SUGG[n.id]=sg; saveDoc(sg);
+}
+
+/* ---------- open-ended Think ---------- */
+const THINK_Q=[['start','1. 어디부터 확인할 것인가?','가장 먼저 볼 곳과 그 이유'],['causes','2. 가능한 원인은?','계층별로 후보를 펼쳐 보세요 (네트워크 / 서버 / 앱 / DB …)'],['impact','3. 어떤 영역이 영향을 받을 수 있는가?','이 문제가 번지는 범위'],['check','4. 어떤 명령어나 지표를 확인할 것인가?','예: top, curl -w, 쿼리 실행 시간, 로그'],['next','5. 다음으로 무엇을 확인할 것인가?','4번 결과가 정상이라면? 이상하다면?']];
+const PRESETS=[
+ {id:'p-slow',title:'웹 서비스 응답이 갑자기 느려졌다',situation:'평소 0.3초이던 웹 서비스 응답이 오늘 오후부터 3~5초로 느려졌습니다. 에러는 없고, 마지막 배포는 어제 저녁이었습니다.'},
+ {id:'p-login',title:'로그인만 실패한다',situation:'배포 직후부터 로그인만 실패합니다. 다른 페이지는 정상이고, 로그인할 때 500 에러가 납니다.'},
+ {id:'p-partial',title:'일부 사용자만 접속이 안 된다',situation:'특정 지역 사용자 일부만 사이트에 접속하지 못합니다. 서버 모니터링에는 이상이 없습니다.'},
+ {id:'p-disk',title:'서버 디스크가 가득 찼다는 알림',situation:'새벽에 "디스크 사용률 98%" 알림이 왔고, 일부 API가 간헐적으로 실패합니다.'},
+];
+const todayPreset=()=>PRESETS[Math.floor(Date.now()/86400000)%PRESETS.length];
+function getThink(id){
+  if(THINKS[id]) return THINKS[id];
+  const p=PRESETS.find(x=>x.id===id);
+  return p?{docId:'th-'+id,kind:'th',id,title:p.title,situation:p.situation,answers:{},rounds:[],created:nowISO(),_new:true}:null;
+}
+function roundHTML(r,num){
+  const fb=r.fb||{};
+  return `<div class="card round"><div class="fbhead"><span class="label">피드백 #${num}</span>${fb.level?`<span class="lv lv${fb.level}">Lv.${fb.level}</span>`:''}<span class="muted" style="font-size:12px">${fmtDate(r.at)}</span></div>
+    ${fb.good&&fb.good.length?`<div class="fbgrp good"><b>접근이 좋은 점</b><ul>${fb.good.map(x=>`<li><span class="sign">+</span>${esc(x)}</li>`).join('')}</ul></div>`:''}
+    ${fb.push&&fb.push.length?`<div class="fbgrp push"><b>더 생각해 볼 질문</b><ul>${fb.push.map(p=>`<li><span class="sign">${p.item||'?'}</span>${esc(p.question)}</li>`).join('')}</ul></div>`:''}
+    ${fb.missing_layers&&fb.missing_layers.length?`<p style="font-size:13.5px"><span class="muted">아직 살펴보지 않은 영역:</span> ${fb.missing_layers.map(x=>`<span class="tag">${esc(x)}</span>`).join(' ')}</p>`:''}
+    ${gapChips(fb.gaps,null,'think')}</div>`;
+}
+function viewThinkOpen(){
+  const t=getThink(state.id); if(!t) return viewThink();
+  const last=t.rounds[t.rounds.length-1]; const pushBy={};
+  if(last&&last.fb) arrOf(last.fb.push).forEach(p=>{(pushBy[p.item]=pushBy[p.item]||[]).push(p.question)});
+  const busyFb=AIB&&AIB.key==='otfb:'+t.id, busyModel=AIB&&AIB.key==='otmodel:'+t.id;
+  return `<div class="wrap"><div class="game-head"><button class="btn ghost sm" data-nav="think" style="align-self:flex-start;margin-left:-10px">← Think</button><span class="eyebrow" style="color:var(--accent)">서술형 사고 훈련</span><h1>${esc(t.title)}</h1><p class="scenario">${esc(t.situation)}</p></div>
+   <div class="otgrid">
+    <form id="otAnswers" class="card otform">${THINK_Q.map(([k,l,ph],i)=>`<label class="undf"><span>${l}</span><textarea class="fld" rows="3" data-ot="${k}" placeholder="${ph}">${esc(t.answers[k]||'')}</textarea>${(pushBy[i+1]||[]).map(q=>`<span class="pushq">🤔 ${esc(q)}</span>`).join('')}</label>`).join('')}
+      <div class="aibtns">${CLOUD.sample?`<button type="button" class="btn primary" id="otFb" ${AIB?'disabled':''}>💡 AI 튜터 피드백 받기</button><button type="button" class="btn" id="otModel" ${AIB?'disabled':''}>🔓 모범 사고 과정 보기</button>`:''}<span class="muted" style="font-size:12.5px">입력한 내용은 자동 저장돼요</span></div></form>
+    <aside class="stack">${busyFb?aiBusy('내 사고 과정을 읽고 꼬리 질문을 만들고 있어요'):''}${t.rounds.slice().reverse().map((r,k)=>roundHTML(r,t.rounds.length-k)).join('')}${!t.rounds.length&&!busyFb?`<div class="card" style="padding:16px"><p class="muted" style="font-size:14px">칸을 채운 뒤 피드백을 받아 보세요. AI는 정답 대신 "CPU가 정상이라면 다음은 어느 계층을 볼까요?" 같은 꼬리 질문으로 방향을 잡아 줘요. 질문은 해당 칸 아래에도 표시돼요.</p></div>`:''}</aside>
+   </div>
+   ${busyModel||t.model?`<section class="card otmodel"><div class="section-title"><h2 style="font-size:19px">🔓 모범 사고 과정</h2></div>${busyModel&&!AIB.text?'<p class="muted">작성하는 중…</p>':''}<div class="md" id="otModelBody">${md(busyModel?AIB.text:t.model,null)}</div></section>`:''}
+  </div>`;
+}
+function ensureThink(t){ if(t._new){delete t._new;THINKS[t.id]=t} return t }
+async function thinkFeedback(t,signal){
+  const prompt=`당신은 장애 대응을 가르치는 소크라테스식 IT 튜터입니다. 원인이나 정답을 알려주지 마세요.
+상황: ${t.situation}
+학습자의 사고 과정:
+${THINK_Q.map(([k,l])=>`${l} ${t.answers[k]||'(비어 있음)'}`).join('\n')}
+${t.rounds.length?`이전 피드백에서 던진 질문: ${arrOf(t.rounds[t.rounds.length-1].fb&&t.rounds[t.rounds.length-1].fb.push).map(p=>p.question).join(' / ')}`:''}
+할 일:
+- good: 접근이 좋은 점 1~3개 (학습자 답을 구체적으로 짚기)
+- push: 항목 번호(1~5)별 꼬리 질문 2~4개. 예: "CPU를 확인했는데 정상이라면 다음으로 어떤 계층을 확인해 볼까요?" 정답을 암시하는 질문 대신 생각할 방향을 여는 질문으로.
+- missing_layers: 아직 고려하지 않은 계층·영역 이름만 0~3개 (예: "DB", "DNS"). 이유는 말하지 말 것.
+- gaps: 개념적으로 모르는 것으로 보이는 주제 0~2개 (짧은 질문형)
+- level: 사고 과정의 체계성 1~5
+JSON만: {"level":3,"good":[],"push":[{"item":1,"question":""}],"missing_layers":[],"gaps":[]}`;
+  const r=await aj(prompt,signal);
+  const fb={level:Math.min(5,Math.max(1,Math.round(+r.level||2))),good:strs(r.good,3),push:arrOf(r.push).map(p=>({item:Math.min(5,Math.max(1,+(p&&p.item)||1)),question:str(p&&p.question,300)})).filter(p=>p.question).slice(0,5),missing_layers:strs(r.missing_layers,3,30),gaps:strs(r.gaps,2,120)};
+  ensureThink(t); t.rounds.push({at:nowISO(),answers:{...t.answers},fb}); saveDoc(t);
+}
+async function thinkModel(t,signal){
+  const prompt=`당신은 시니어 SRE입니다. 아래 장애 상황에서 숙련자가 생각하는 순서를 보여 주세요. 원인을 하나로 단정하지 말고 '어떻게 좁혀 가는지'를 보여 주는 것이 목표입니다.
+상황: ${t.situation}
+${COMPLETENESS}
+Markdown 형식:
+## 1. 어디부터 확인할 것인가
+## 2. 가능한 원인 (계층별)
+## 3. 영향 범위
+## 4. 확인할 명령어·지표  (코드 블록으로)
+## 5. 다음 단계  ("정상이면 → … / 이상하면 → …" 형태)
+흐름을 보여 주는 flow 그림 1개를 넣으세요.
+마지막 줄에 학습자 답과 비교한 한 줄: "> 핵심: 학습자가 놓친 관점 — …"
+학습자 답: ${THINK_Q.map(([k,l])=>`${l} ${t.answers[k]||'(비어 있음)'}`).join(' / ')}
+
+${DIAGRAM_GUIDE}`;
+  const {text}=await CLOUD.sample(prompt,{signal,modelTier:'default',onText:({text})=>{if(AIB)AIB.text=text;const el=$('#otModelBody');if(el)el.innerHTML=md(text,null)}});
+  ensureThink(t); t.model=text; saveDoc(t);
+}
+function openThinkSection(){
+  const mine=Object.values(THINKS).filter(t=>!PRESETS.some(p=>p.id===t.id)).sort(byNewest('created'));
+  return `<section class="card openthink"><span class="label" style="color:var(--accent)">✍️ 서술형 사고 훈련</span><h2 style="font-size:19px;margin:4px 0 4px">상황을 보고 내 사고 과정을 직접 써 보세요</h2><p class="muted" style="font-size:14px">어디부터 확인할지, 가능한 원인, 영향 범위, 확인할 지표, 다음 단계를 직접 적고 AI 튜터의 꼬리 질문으로 다듬어요.</p>
+    <div class="presetgrid">${PRESETS.map(p=>{const t=THINKS[p.id];return `<button class="pcard" data-thinkopen="${p.id}"><b>${esc(p.title)}</b><span>${t&&t.rounds.length?`피드백 ${t.rounds.length}회`:t?'작성 중':'시작하기 →'}</span></button>`}).join('')}
+      ${mine.map(t=>`<button class="pcard mine" data-thinkopen="${t.id}"><b>${esc(t.title)}</b><span>내 상황 · ${t.rounds.length?`피드백 ${t.rounds.length}회`:'작성 중'}</span></button>`).join('')}</div>
+    <form id="otNew" class="caprow" style="margin-top:12px"><label class="sr" for="otText">내 상황</label><input class="fld" id="otText" placeholder="내 상황으로: 예) 배포 후 메모리 사용량이 계속 늘어난다" style="flex:1 1 280px"><button class="btn sm primary">이 상황으로 시작</button></form>
+  </section>`;
+}
+
+/* ---------- Review ---------- */
+const IV=[1,1,2,4,7,14];
+function reviewCands(){
+  const now=Date.now();
+  return NODES.filter(n=>STATUS[n.id]||UND[n.id]).map(n=>{const r=lastReview(n.id);const lv=levelOf(n.id);const last=r?new Date(r.at).getTime():0;
+    return {id:n.id,lv,last,due:!r||STATUS[n.id]==='weak'||(now-last)>=IV[lv]*86400000*0.95}}).sort((a,b)=>a.last-b.last||a.lv-b.lv);
+}
+function reviewQs(id){
+  const n=byId[id]; const qs=[{k:'what',q:`${n.name}란 무엇인가?`,ph:'내 말로 설명하기'}];
+  const o=prereqs(id)[0]||related(id)[0]||nexts(id)[0];
+  if(o) qs.push({k:'rel',q:`${n.name}와 ${byId[o.id].name}의 관계는?`,ph:'왜 연결되어 있는지 내 말로'});
+  if(n.think&&n.think.q) qs.push({k:'think',q:n.think.q,ph:'내 생각 작성'});
+  return qs;
+}
+function rvCard(x){const n=byId[x.id];const r=lastReview(x.id);
+  return `<div class="card rvcard cat-${catOf(n)}"><div class="rvtop"><span class="dot catdot"></span><b>${esc(n.name)}</b>${lvBadge(x.id)}</div><p class="muted" style="font-size:12.5px">${r?`마지막 복습 ${fmtDate(r.at)}`:'아직 복습 안 함'} · ${reviewQs(x.id).length}문항</p><button class="btn sm ${x.due?'primary':''}" data-rvstart="${x.id}">복습 시작</button></div>`}
+function rvResult(r){
+  if(!r.fb) return `<div class="card" style="padding:14px"><span class="label">${fmtDate(r.at)}</span><p class="muted" style="font-size:13.5px">피드백 없이 저장한 복습</p></div>`;
+  return fbHTML({...r.fb,at:r.at},r.node,'복습 피드백');
+}
+function viewReview(){
+  if(state.rv&&has(state.rv)) return reviewSession(state.rv);
+  const c=reviewCands(); const due=c.filter(x=>x.due), soon=c.filter(x=>!x.due);
+  return `<div class="wrap"><div class="page-h"><h1>🔄 Review</h1><p class="muted" style="max-width:62ch">암기 카드가 아니라 "다시 설명하기"로 복습해요. 지난번 답과 비교해서 무엇이 좋아졌고 무엇이 아직 부족한지 보여줘요.</p></div>
+   ${c.length?`<h2 class="sub">오늘의 복습 <span class="muted">${due.length}</span></h2><div class="rvlist">${due.length?due.slice(0,6).map(rvCard).join(''):'<p class="muted">오늘 복습할 개념을 모두 마쳤어요.</p>'}</div>
+   ${soon.length?`<h2 class="sub">곧 복습할 개념</h2><div class="rvlist">${soon.slice(0,9).map(rvCard).join('')}</div>`:''}`
+   :'<div class="card"><p class="muted">개념 페이지에서 이해도를 표시하거나 "내 말로 설명하기"를 쓰면 복습 목록에 들어와요.</p></div>'}
+   <p class="muted" style="font-size:12.5px;margin-top:16px">복습 간격은 이해도 레벨에 따라 1·2·4·7·14일로 늘어나고, "자주 틀림" 개념은 매일 나와요.</p></div>`;
+}
+function reviewSession(id){
+  const n=byId[id]; const qs=reviewQs(id); const d=RVD[id]||(RVD[id]={});
+  const hist=REVIEWS.filter(r=>r.node===id).sort(byNewest('at')); const last=hist[0]; const busy=AIB&&AIB.key==='rv:'+id;
+  return `<div class="wrap"><button class="btn ghost sm" data-space="review" style="margin-left:-10px">← 복습 목록</button>
+   <div class="page-h" style="margin-top:8px"><span class="eyebrow">오늘의 복습</span><h1>${esc(n.name)} ${lvBadge(id)}</h1></div>
+   <form id="rvForm" class="stack">${qs.map((q,i)=>`<div class="card rvq"><span class="label">Q${i+1}</span><p class="rvqq">${esc(q.q)}</p><label class="sr" for="rv-${q.k}">답</label><textarea class="fld" id="rv-${q.k}" rows="3" data-rv="${q.k}" placeholder="${q.ph}">${esc(d[q.k]||'')}</textarea>${last&&last.answers&&last.answers[q.k]?`<details class="raw"><summary>지난번 내 답 (${fmtDate(last.at)})</summary><p>${esc(last.answers[q.k])}</p></details>`:''}</div>`).join('')}
+    <div class="aibtns">${CLOUD.sample?`<button type="button" class="btn primary" id="rvAI" ${AIB?'disabled':''}>${last?'지난 답과 비교해서 피드백 받기':'피드백 받기'}</button>`:''}<button type="button" class="btn" id="rvSave" ${AIB?'disabled':''}>저장만 하기</button><button type="button" class="btn ghost sm" data-open="${id}">개념 다시 보기</button></div></form>
+   ${busy?`<div style="margin-top:14px">${aiBusy('지난 답과 비교하고 있어요')}</div>`:''}
+   ${hist.length?`<section class="stack" style="margin-top:24px"><h2 class="sub">복습 기록</h2>${hist.slice(0,4).map(rvResult).join('')}</section>`:''}
+  </div>`;
+}
+function saveReview(id,fb){
+  const qs=reviewQs(id); const d=RVD[id]||{};
+  const rec={docId:uid('rv-'),kind:'rv',node:id,qs:qs.map(q=>({k:q.k,q:q.q})),answers:{...d},fb:fb||null,at:nowISO()};
+  REVIEWS.push(rec); saveDoc(rec); RVD[id]={};
+  if(fb&&fb.score){ setStatus(id,fb.score>=4?'known':fb.score<=2?'weak':'learning'); }
+  return rec;
+}
+async function reviewAI(id,signal){
+  const n=byId[id]; const qs=reviewQs(id); const d=RVD[id]||{};
+  const prev=REVIEWS.filter(r=>r.node===id).sort(byNewest('at'))[0]; const u=UND[id];
+  const prompt=`당신은 IT 튜터입니다. 학습자가 "${n.name}" 복습 질문에 자기 말로 답했습니다. 정답을 대신 써 주지 말고 평가하세요.
+(평가 기준 — 참고용) 요약: ${n.summary} / 무엇: ${n.what} / 왜: ${n.why} / 문제 상황 모범 답: ${n.think&&n.think.a||''}
+이번 답:
+${qs.map(q=>`Q. ${q.q}\nA. ${d[q.k]||'(비어 있음)'}`).join('\n')}
+지난 복습 답 (${prev?fmtDate(prev.at):'없음'}):
+${prev?qs.map(q=>`Q. ${q.q}\nA. ${prev.answers&&prev.answers[q.k]||'(없음)'}`).join('\n'):'없음'}
+학습자의 이전 정리: ${u?UF.map(([k,l])=>`${l} ${u.fields[k]||''}`).join(' / '):'없음'}
+할 일:
+- score: 1~5
+- improved: ${prev?'지난번보다 좋아진 부분':'이번에 잘 설명한 부분'} 1~3개 (구체적으로)
+- lacking: 아직 부족한 부분 1~3개. 답을 주지 말고 무엇이 부족한지만 (예: "TCP의 신뢰성 보장 방식")
+- next: 다음에 해 볼 것 1문장
+- gaps: 지식 공백 후보 0~2개 (짧은 질문형)
+JSON만: {"score":3,"improved":[],"lacking":[],"next":"","gaps":[]}`;
+  const r=await aj(prompt,signal);
+  const fb={score:Math.min(5,Math.max(1,Math.round(+r.score||2))),improved:strs(r.improved,3),lacking:strs(r.lacking,3),next:str(r.next,300),gaps:strs(r.gaps,2,120)};
+  saveReview(id,fb);
+}
+
+/* ---------- Gaps view ---------- */
+function gapItem(g){
+  const n=g.node&&byId[g.node]; const ai=GAPAI[g.docId];
+  return `<article class="gapitem ${g.done?'done':''}"><label class="chk gapchk"><input type="checkbox" data-gapdone="${g.docId}" ${g.done?'checked':''}><span class="gaptext">${esc(g.text)}</span></label>
+    <div class="gapmeta">${n?`<button class="nlink" data-open="${n.id}" style="font-weight:500">${esc(n.name)}</button> · `:''}${GAP_SRC[g.source]||''} · ${fmtDate(g.created)}${g.why?` · <span title="${esc(g.why)}">${esc(g.why.slice(0,60))}</span>`:''}</div>
+    ${!g.done?`<div class="gapacts"><button class="btn sm" data-gapstudy="${g.docId}">📚 공부하기</button><button class="btn sm" data-gaprel="${g.docId}">🔗 관련 개념 보기</button>${CLOUD.sample?`<button class="btn sm" data-gapask="${g.docId}" ${ai&&ai.busy?'disabled':''}>❓ AI에게 질문하기</button><button class="btn sm" data-gapthink="${g.docId}">🤔 Think 문제 풀기</button>`:''}<button class="linkbtn" data-gapdel="${g.docId}">삭제</button></div>`:''}
+    ${ai?`<div class="gapans">${ai.busy&&!ai.text?'<p class="muted" style="font-size:13.5px">생각하는 중…</p>':''}<div class="md" id="gapans-${g.docId}">${md(ai.text||'',g.node)}</div>${!ai.busy&&!g.done?`<div class="aibtns"><button class="btn sm primary" data-gapdone2="${g.docId}">이해했어요, 해결로 표시</button><span class="muted" style="font-size:12.5px">이 답은 질문 기록에도 저장됐어요</span></div>`:''}</div>`:''}
+  </article>`;
+}
+function viewGaps(){
+  const open=openGaps().sort(byNewest('created')), done=GAPS.filter(g=>g.done).sort(byNewest('doneAt'));
+  const scanning=AIB&&AIB.key==='gapscan';
+  return `<div class="wrap"><div class="page-h"><h1>🕳️ Knowledge Gaps</h1><p class="muted" style="max-width:62ch">공부하다 생긴 의문을 모아 두는 곳이에요. "내 말로 설명하기"의 '아직 모르는 것', AI 피드백, 복습에서 나온 공백도 여기에 쌓여요.</p></div>
+   <form class="card gapform" id="gapForm"><div class="caprow"><label class="sr" for="gapText">새 공백</label><input class="fld" id="gapText" placeholder="예: TCP 3-way handshake가 왜 필요한가" style="flex:1 1 300px"><select class="fld" id="gapNode" aria-label="관련 개념"><option value="">관련 개념 (선택)</option>${sortedNodes().map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select><button class="btn primary sm">추가</button></div></form>
+   <div class="gapai">${scanning?aiBusy('지금까지의 기록을 보고 모르는 부분을 찾고 있어요'):CLOUD.sample?`<button class="btn sm" id="gapScan" ${AIB?'disabled':''}>🔍 AI로 내 지식 공백 찾기</button><span class="muted" style="font-size:12.5px">이해도 표시, 내 설명, 노트, 질문 기록, 복습 결과를 보고 찾아요</span>`:''}</div>
+   ${GAPSUG&&GAPSUG.length?`<div class="card sgbox"><span class="label" style="color:var(--accent)">AI가 찾은 공백 후보 · 추가할 것만 고르세요</span>${GAPSUG.map((g,k)=>`<div class="sgitem"><div><b>${esc(g.text)}</b>${g.node?` <span class="tag" style="font-size:11px">${esc(byId[g.node].name)}</span>`:''}</div><p class="muted">${esc(g.why)}</p><div class="aibtns"><button class="btn sm primary" data-gsadd="${k}">공백에 추가</button><button class="linkbtn" data-gsno="${k}">무시</button></div></div>`).join('')}</div>`:''}
+   <h2 class="sub">아직 해결하지 않은 질문 <span class="muted">${open.length}</span></h2>
+   <div class="gaplist">${open.length?open.map(gapItem).join(''):'<p class="muted">등록된 공백이 없어요. 공부하다 궁금한 점이 생기면 위에 적어 두세요.</p>'}</div>
+   ${done.length?`<details class="donegaps"><summary>해결한 공백 ${done.length}개</summary><div class="gaplist">${done.map(gapItem).join('')}</div></details>`:''}
+  </div>`;
+}
+async function gapScan(signal){
+  const st=NODES.filter(n=>STATUS[n.id]).map(n=>`${n.name}: ${ST_LABEL[STATUS[n.id]]}, Lv.${levelOf(n.id)}`).join('\n');
+  const und=Object.values(UND).filter(u=>has(u.node)).slice(-8).map(u=>`[${byId[u.node].name}] ${UF.map(([k,l])=>`${l} ${String(u.fields[k]||'').slice(0,300)}`).join(' / ')}${u.fb?` (AI 피드백 빠진 부분: ${u.fb.missing.join('; ')})`:''}`).join('\n');
+  const notes=INSIGHTS.slice().sort(byNewest('created')).slice(0,15).map(i=>`- ${i.node&&byId[i.node]?byId[i.node].name+': ':''}${i.text.slice(0,200)}`).join('\n');
+  const qas=QAS.slice().sort(byNewest('created')).slice(0,15).map(q=>`- ${q.q.slice(0,150)}`).join('\n');
+  const rv=REVIEWS.filter(r=>r.fb).slice(-8).map(r=>`- ${byId[r.node]?byId[r.node].name:''}: 부족 ${r.fb.lacking.join('; ')}`).join('\n');
+  const prompt=`당신은 학습 분석가입니다. 아래 학습 기록을 보고, 학습자가 아직 모르거나 헷갈리는 것으로 보이는 '구체적인 질문' 형태의 지식 공백을 찾으세요.
+지도 개념 (id: 이름): ${NODES.map(m=>m.id+': '+m.name).join(', ')}
+이해도 표시:
+${st||'없음'}
+내 말로 설명한 내용:
+${und||'없음'}
+노트:
+${notes||'없음'}
+튜터에게 한 질문:
+${qas||'없음'}
+복습에서 부족했던 부분:
+${rv||'없음'}
+이미 등록된 공백 (겹치지 말 것): ${GAPS.map(g=>g.text).join(' / ')||'없음'}
+규칙: 3~6개. 각 {"text":"짧은 질문 (예: TCP는 순서를 어떻게 보장하는가)","node":"관련 개념 id 또는 null","why":"어떤 기록을 보고 그렇게 판단했는지 1문장"}. 기록이 적으면 '학습 중' 개념의 선행 개념 중 비어 있는 것을 기준으로.
+JSON만: {"gaps":[]}`;
+  const r=await aj(prompt,signal);
+  GAPSUG=arrOf(r.gaps).map(g=>({text:str(g&&g.text,200),node:has(g&&g.node)?g.node:null,why:str(g&&g.why,200)})).filter(g=>g.text&&!GAPS.some(x=>x.text===g.text)).slice(0,6);
+  if(!GAPSUG.length) toast('새로 찾은 공백이 없어요.');
+}
+async function gapAsk(g){
+  if(!CLOUD.sample) return; const st=GAPAI[g.docId]={busy:true,text:'',ctl:new AbortController()}; rerender();
+  const n=g.node&&byId[g.node];
+  const prompt=`당신은 IT 튜터입니다. 학습자가 공부하다 생긴 의문입니다: "${g.text}"${n?` (관련 개념: ${n.name})`:''}
+${n?learnerContext(n):''}
+${COMPLETENESS}
+답하는 방식: 핵심을 짧은 문단과 목록으로 설명하고, 구조나 흐름이 있으면 그림 블록 1개를 넣으세요. 다른 개념 이름은 [[이름]]으로. 마지막에 "> 핵심: …" 한 줄과, 이해했는지 스스로 확인할 질문 1개를 붙이세요. 한국어.
+${DIAGRAM_GUIDE}`;
+  try{
+    const {text}=await CLOUD.sample(prompt,{signal:st.ctl.signal,cache:false,modelTier:'default',onText:({text})=>{st.text=text;const el=document.getElementById('gapans-'+g.docId);if(el)el.innerHTML=md(text,g.node)}});
+    st.text=text; saveQA({node:g.node||'',ch:'',chTitle:'지식 공백',q:g.text,a:text,mode:'explain'});
+  }catch(e){ st.text=''; if(!(e&&e.code==='cancelled')) toast(genErr(e&&e.code)); delete GAPAI[g.docId]; }
+  st.busy=false; if(state.view==='space') rerender();
+}
+
+/* ---------- My Map & Progress ---------- */
+function viewMyMap(){
+  const es=EDGES.filter(e=>e.user);
+  const pend=Object.values(SUGG).reduce((a,s)=>a+s.items.filter(x=>x.state==='pending').length,0);
+  return `<div class="wrap"><div class="page-h"><h1>🗺️ My Map</h1><p class="muted" style="max-width:62ch">내가 직접 만들거나 AI 추천을 승인한 연결만 모은 나만의 지식 구조예요.</p></div>
+   <div class="me-grid"><div class="mapwrap" id="mymapwrap">${es.length?'<div id="panel"></div>':`<div class="emptymap"><p>아직 내가 만든 연결이 없어요.</p><p class="muted" style="font-size:13.5px">개념 페이지의 CONNECTION 단계에서 "+ 내가 아는 연결 추가"를 누르거나 AI 추천을 승인해 보세요.</p></div>`}</div>
+    <div class="stack"><div class="card" style="padding:16px"><span class="label">내 연결 ${es.length}</span>${es.length?`<div class="stack" style="gap:10px;margin-top:10px">${es.slice().reverse().map(e=>`<div class="mcitem ${e.origin==='ai'?'fromai':''}"><div><button class="nlink" data-open="${e.s}">${esc(byId[e.s].name)}</button> <span class="reltype">${e.type}</span> <button class="nlink" data-open="${e.t}">${esc(byId[e.t].name)}</button>${e.origin==='ai'?' <span class="tag" style="font-size:11px">AI 추천 → 승인</span>':''}</div><p><span class="muted">${e.origin==='ai'?'추천 이유':'내가 생각한 이유'}:</span> ${esc(e.why||'(적지 않음)')}</p></div>`).join('')}</div>`:''}</div>
+    ${pend?`<div class="card" style="padding:16px"><span class="label">승인을 기다리는 AI 추천 ${pend}</span><div class="chips" style="margin-top:8px">${Object.values(SUGG).filter(s=>has(s.node)&&s.items.some(x=>x.state==='pending')).map(s=>`<button class="chip" data-open="${s.node}">${esc(byId[s.node].name)}</button>`).join('')}</div></div>`:''}</div></div></div>`;
+}
+function afterMyMap(){
+  const es=EDGES.filter(e=>e.user); const wrap=$('#mymapwrap'); if(!es.length||!wrap) return;
+  const ids=new Set(); es.forEach(e=>{ids.add(e.s);ids.add(e.t)}); const panel=$('#panel');
+  graph=forceGraph(wrap,{nodes:NODES.filter(n=>ids.has(n.id)),links:es,nodeClass:d=>d.ai?'ai':'',onSelect:id=>{panel.innerHTML=id?nodePanel(id):''},onOpen:id=>go('detail',{id}),onEdge:e=>{panel.innerHTML=edgePanel(e)}});
+  panel.addEventListener('click',ev=>{ if(ev.target.closest('[data-close]')){panel.innerHTML='';graph.select(null)} });
+}
+function activityDays(n){
+  const days=[]; const today=new Date(); today.setHours(0,0,0,0);
+  for(let i=n-1;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);days.push({d,key:d.toDateString(),c:0})}
+  const bump=s=>{if(!s)return;const k=new Date(s);k.setHours(0,0,0,0);const x=days.find(y=>y.key===k.toDateString());if(x)x.c++};
+  INSIGHTS.forEach(i=>bump(i.created)); QAS.forEach(q=>bump(q.created)); REVIEWS.forEach(r=>bump(r.at));
+  Object.values(UND).forEach(u=>{bump(u.updated);(u.history||[]).forEach(h=>bump(h.at))}); GAPS.forEach(g=>{bump(g.created);bump(g.doneAt)});
+  Object.values(THINKS).forEach(t=>t.rounds.forEach(r=>bump(r.at))); Object.values(LESSONS).forEach(l=>bump(l.created));
+  return days;
+}
+function viewProgress(){
+  const c={known:0,learning:0,weak:0}; NODES.forEach(n=>{if(c[STATUS[n.id]]!==undefined)c[STATUS[n.id]]++});
+  const lvd=[0,0,0,0,0,0]; NODES.filter(n=>STATUS[n.id]||UND[n.id]).forEach(n=>lvd[levelOf(n.id)]++);
+  const chDone=Object.values(LESSONS).filter(l=>l.done).length;
+  const days=activityDays(14); const mx=Math.max(1,...days.map(d=>d.c)); const lmx=Math.max(1,...lvd);
+  const tiles=[['이해한 개념',c.known],['학습 중',c.learning],['내 말로 정리',Object.keys(UND).length],['복습',REVIEWS.length],['해결한 공백',`${GAPS.filter(g=>g.done).length}/${GAPS.length}`],['내 연결',EDGES.filter(e=>e.user).length],['완료한 챕터',chDone],['사고 훈련',Object.values(THINKS).reduce((a,t)=>a+t.rounds.length,0)]];
+  return `<div class="wrap"><div class="page-h"><h1>📊 Progress</h1><p class="muted">공부한 내용이 '내 지식'으로 바뀌어 가는 과정이에요.</p></div>
+   <div class="tiles">${tiles.map(([l,v])=>`<div class="tile"><b>${v}</b><span>${l}</span></div>`).join('')}</div>
+   <div class="progrid">
+    <section class="card"><span class="label">최근 14일 학습 활동</span><div class="bars" role="img" aria-label="최근 14일 활동 막대">${days.map(d=>`<div class="barcol" title="${d.d.getMonth()+1}/${d.d.getDate()} · ${d.c}"><span class="bv">${d.c||''}</span><i style="height:${Math.round(d.c/mx*100)}%"></i><small>${d.d.getDate()}</small></div>`).join('')}</div><p class="muted" style="font-size:12px">노트, 질문, 복습, 내 설명, 공백, 사고 훈련, 강의 노트를 하루 단위로 센 값</p></section>
+    <section class="card"><span class="label">이해도 레벨 분포</span><div class="lvbars">${lvd.map((v,i)=>`<div class="lvrow"><span class="lv lv${i}">Lv.${i}</span><span class="lvbar"><i style="width:${Math.round(v/lmx*100)}%"></i></span><b>${v}</b></div>`).join('')}</div><p class="muted" style="font-size:12px">복습 점수 → AI 이해도 피드백 → 이해도 표시 순으로 레벨을 정해요</p></section>
+   </div></div>`;
+}
+
+/* ---------- My Space ---------- */
+const SPACE_TABS=[['knowledge','🧠 My Knowledge'],['mymap','🗺️ My Map'],['gaps','🕳️ Knowledge Gaps'],['notes','📝 Notes'],['qa','💬 질문 기록'],['review','🔄 Review'],['progress','📊 Progress']];
+function viewSpace(){
+  const t=state.tab||'knowledge';
+  const cnt={gaps:openGaps().length,review:reviewCands().filter(x=>x.due).length,notes:INSIGHTS.length,qa:QAS.length};
+  const bar=`<div class="wrap"><div class="spacehead"><span class="eyebrow">My Space</span><div class="tabs scrolltabs" role="tablist">${SPACE_TABS.map(([k,l])=>`<button role="tab" class="${t===k?'on':''}" aria-selected="${t===k}" data-space="${k}">${l}${cnt[k]?` <span>${cnt[k]}</span>`:''}</button>`).join('')}</div></div></div>`;
+  const inner=t==='knowledge'?viewMe():(t==='notes'||t==='qa')?viewNotes():t==='mymap'?viewMyMap():t==='gaps'?viewGaps():t==='review'?viewReview():viewProgress();
+  return bar+inner;
+}
+after.space=()=>{
+  const t=state.tab||'knowledge';
+  if(t==='knowledge') after.me(); else if(t==='notes'||t==='qa') after.notes(); else if(t==='mymap') afterMyMap();
+  else if(t==='gaps'){
+    $('#gapForm')?.addEventListener('submit',e=>{e.preventDefault();const g=addGap({text:$('#gapText').value,node:$('#gapNode').value,source:'manual'});if(g){toast('공백을 등록했어요.');rerender()}else $('#gapText').focus()});
+    $('#gapScan')?.addEventListener('click',()=>runAI('gapscan',gapScan));
+  } else if(t==='review'&&state.rv){
+    const id=state.rv;
+    $$('[data-rv]').forEach(x=>x.addEventListener('input',()=>{(RVD[id]=RVD[id]||{})[x.dataset.rv]=x.value}));
+    const filled=()=>Object.values(RVD[id]||{}).some(v=>String(v).trim());
+    $('#rvAI')?.addEventListener('click',()=>{if(!filled()){toast('먼저 답을 하나 이상 써 주세요.');return}runAI('rv:'+id,s=>reviewAI(id,s),'복습을 저장했어요.')});
+    $('#rvSave')?.addEventListener('click',()=>{if(!filled()){toast('먼저 답을 하나 이상 써 주세요.');return}saveReview(id,null);toast('복습을 저장했어요.');rerender()});
+  }
+};
+
+/* ---------- Home ---------- */
+function viewHome(){
+  const h=new Date().getHours(); const greet=h<5?'늦은 밤이에요':h<12?'좋은 아침이에요':h<18?'좋은 오후예요':'좋은 저녁이에요';
+  const contId=[...TRAIL].reverse().find(has)||NODES.find(n=>STATUS[n.id]==='learning')?.id;
+  const cont=contId&&byId[contId];
+  const gaps=openGaps().sort(byNewest('created')); const due=reviewCands().filter(x=>x.due);
+  const lastEdge=[...EDGES].reverse().find(e=>e.user); const tp=todayPreset();
+  const lv=cont?levelOf(cont.id):0;
+  return `<div class="wrap home2">
+   <h1 class="greet">${greet} 👋</h1>
+   <div class="hgrid">
+    <article class="card hcont">${cont?`<span class="label">오늘 이어서 공부하기</span><h2>${esc(cont.name)}</h2><div class="lvmeter" aria-label="이해도 Lv.${lv}">${[1,2,3,4,5].map(i=>`<i class="${i<=lv?'on':''}"></i>`).join('')}<span>이해도 Lv.${lv}</span></div><p class="muted">${esc(cont.summary)}</p>
+      <div class="aibtns"><button class="btn primary" ${COURSES[cont.id]?`data-deep="${cont.id}"`:`data-open="${cont.id}"`}>계속 학습하기 →</button>${UND[cont.id]?'':`<button class="btn" data-und="${cont.id}">내 말로 설명하기</button>`}</div>`
+      :`<span class="label">시작하기</span><h2>무엇부터 공부할까요?</h2><div class="chips" style="margin-top:6px">${['http','linux','docker','database'].map(id=>nodeChip(id)).join('')}</div>`}</article>
+    <button class="card hcard" data-space="gaps"><span class="label">🕳️ 아직 해결하지 않은 질문</span><b class="big">${gaps.length}<small>개</small></b>${gaps.slice(0,2).map(g=>`<span class="hline">· ${esc(g.text)}</span>`).join('')||'<span class="hline">궁금한 점이 생기면 여기에 모여요</span>'}</button>
+    <button class="card hcard" data-space="review"><span class="label">🔄 오늘의 복습</span><b class="big">${due.length}<small>개</small></b><span class="hline">${due.slice(0,3).map(x=>esc(byId[x.id].name)).join(', ')||'오늘 복습할 개념이 없어요'}</span></button>
+    <button class="card hcard" data-space="mymap"><span class="label">🔗 최근 추가한 연결</span>${lastEdge?`<b class="mid">${esc(byId[lastEdge.s].name)} → ${esc(byId[lastEdge.t].name)}</b><span class="hline">${esc(lastEdge.why||lastEdge.type)}</span>`:'<span class="hline">개념 페이지에서 내가 아는 연결을 추가해 보세요</span>'}</button>
+    <button class="card hcard hthink" data-thinkopen="${tp.id}"><span class="label">🤔 오늘의 Think</span><b class="mid">"${esc(tp.title)}"</b><span class="hline">어디부터 확인하시겠어요?</span></button>
+   </div>
+   <section class="hsearch"><span class="label">🔍 IT 지식 검색</span><form class="searchbar" id="homeSearch" role="search">${IC.explore}<input id="homeQ" placeholder="기술, 솔루션, 상황 무엇이든: Kafka, Redis, 서버가 느려요" aria-label="검색" autocomplete="off"><button class="btn primary">탐색</button></form><p class="muted" style="font-size:12.5px">지도에 없는 것은 AI가 개념과 연결 관계를 만들어 추가해요.</p></section>
+  </div>`;
+}
+
+/* ---------- delegated actions ---------- */
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-aicancel]')){AIB&&AIB.ctl&&AIB.ctl.abort();Object.values(GAPAI).forEach(x=>x.ctl&&x.busy&&x.ctl.abort());return}
+  const sp=e.target.closest('[data-space]'); if(sp){go('space',{tab:sp.dataset.space});return}
+  const to=e.target.closest('[data-thinkopen]'); if(to){go('thinkopen',{id:to.dataset.thinkopen});return}
+  const un=e.target.closest('[data-und]'); if(un){const id=un.dataset.und;if(state.view==='detail'&&state.id===id)$('#und')?.scrollIntoView({block:'start',behavior:'smooth'});else go('detail',{id,scrollUnd:true});return}
+  const ag=e.target.closest('[data-addgap]'); if(ag){const g=addGap({text:ag.dataset.addgap,node:ag.dataset.gapnode,source:ag.dataset.gapsrc||'fb'});ag.disabled=true;ag.textContent='✓ '+ag.dataset.addgap;if(g)toast('지식 공백에 등록했어요.');return}
+  const sa=e.target.closest('[data-sgadd]'); if(sa){const [nid,i]=sa.dataset.sgadd.split('|');const sg=SUGG[nid];const x=sg&&sg.items[+i];if(x&&!EDGES.some(y=>y.s===x.s&&y.t===x.t)){addUserEdge({...x,origin:'ai'});x.state='added';saveDoc(sg);toast('내 지식 그래프에 추가했어요.');rerender()}return}
+  const sn=e.target.closest('[data-sgno]'); if(sn){const [nid,i]=sn.dataset.sgno.split('|');const sg=SUGG[nid];if(sg&&sg.items[+i]){sg.items[+i].state='dismissed';saveDoc(sg);rerender()}return}
+  const gd=e.target.closest('[data-gapdone2]'); if(gd){const g=GAPS.find(x=>x.docId===gd.dataset.gapdone2);if(g){g.done=true;g.doneAt=nowISO();saveDoc(g);toast('해결한 공백으로 옮겼어요.');rerender()}return}
+  const gs=e.target.closest('[data-gapstudy]'); if(gs){const g=GAPS.find(x=>x.docId===gs.dataset.gapstudy);if(g){if(g.node&&has(g.node))go(COURSES[g.node]?'deep':'detail',{id:g.node});else go('explore',{q:g.text})}return}
+  const gr=e.target.closest('[data-gaprel]'); if(gr){const g=GAPS.find(x=>x.docId===gr.dataset.gaprel);if(g){if(g.node&&has(g.node))go('map',{focus:g.node});else go('explore',{q:g.text})}return}
+  const ga=e.target.closest('[data-gapask]'); if(ga){const g=GAPS.find(x=>x.docId===ga.dataset.gapask);if(g)gapAsk(g);return}
+  const gt=e.target.closest('[data-gapthink]'); if(gt){const g=GAPS.find(x=>x.docId===gt.dataset.gapthink);if(g){if(GEN&&GEN.busy){toast('다른 생성이 끝나면 다시 눌러 주세요.');return}toast('이 공백을 다루는 사고 문제를 만들고 있어요. 보통 20~60초 걸려요.');startGen('scenario',`${g.text} (이 개념을 이해해야 원인을 찾을 수 있는 장애 상황)`)}return}
+  const gx=e.target.closest('[data-gapdel]'); if(gx){if(gx.dataset.armed){GAPS=GAPS.filter(x=>x.docId!==gx.dataset.gapdel);persist(gx.dataset.gapdel,null);rerender()}else{gx.dataset.armed='1';gx.textContent='한 번 더 누르면 삭제';gx.style.color='var(--err-text)'}return}
+  const gsa=e.target.closest('[data-gsadd]'); if(gsa&&GAPSUG){const x=GAPSUG[+gsa.dataset.gsadd];if(x){addGap({text:x.text,node:x.node,source:'ai',why:x.why});GAPSUG.splice(+gsa.dataset.gsadd,1);rerender()}return}
+  const gsn=e.target.closest('[data-gsno]'); if(gsn&&GAPSUG){GAPSUG.splice(+gsn.dataset.gsno,1);rerender();return}
+  const rs=e.target.closest('[data-rvstart]'); if(rs){go('space',{tab:'review',rv:rs.dataset.rvstart});return}
+  const i2u=e.target.closest('[data-ins2und]'); if(i2u){const i=INSIGHTS.find(x=>x.docId===i2u.dataset.ins2und);if(i&&has(i.node))go('detail',{id:i.node,prefill:i.docId,undEdit:true,scrollUnd:true});return}
+  const i2g=e.target.closest('[data-ins2gap]'); if(i2g){const i=INSIGHTS.find(x=>x.docId===i2g.dataset.ins2gap);if(i){const g=addGap({text:i.text.slice(0,200),node:i.node,source:'note'});i2g.textContent=g?'공백에 등록됨':'이미 있음';i2g.disabled=true}return}
+});
+document.addEventListener('change',e=>{
+  const gc=e.target.closest('[data-gapdone]'); if(gc){const g=GAPS.find(x=>x.docId===gc.dataset.gapdone);if(g){g.done=gc.checked;g.doneAt=gc.checked?nowISO():null;saveDoc(g);setTimeout(rerender,250)}}
+});
+
+/* ---------- Think page & open think wiring ---------- */
+after.thinkopen=()=>{
+  const t=getThink(state.id); if(!t) return; let tm=null;
+  $$('[data-ot]').forEach(x=>x.addEventListener('input',()=>{t.answers[x.dataset.ot]=x.value;ensureThink(t);clearTimeout(tm);tm=setTimeout(()=>saveDoc(t),800)}));
+  const filled=()=>Object.values(t.answers).some(v=>String(v).trim());
+  $('#otFb')?.addEventListener('click',()=>{if(!filled()){toast('먼저 한 칸 이상 써 주세요.');return}ensureThink(t);saveDoc(t);runAI('otfb:'+t.id,s=>thinkFeedback(t,s))});
+  const om=$('#otModel'); if(om) om.addEventListener('click',()=>{
+    if(!t.rounds.length&&!om.dataset.armed){om.dataset.armed='1';om.textContent='먼저 스스로 써 보는 걸 권해요. 그래도 볼까요?';return}
+    ensureThink(t); runAI('otmodel:'+t.id,s=>thinkModel(t,s));
+  });
 };
 
 loadCustom(CUSTOM);
