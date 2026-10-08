@@ -23,8 +23,8 @@
       if(p){ try{localStorage.setItem(PW_KEY,p)}catch(e){} return call(messages,opts,json,true) }
       throw err('not_granted','password required');
     }
-    if(res.status===429) throw err('rate_limited');
-    if(!res.ok){ var d=''; try{d=(await res.json()).error}catch(e){} console.warn('[IT MAP] /api/ai',res.status,d); throw err('upstream_error',d) }
+    if(res.status===429){ var m=''; try{m=(await res.json()).error}catch(e){} window.ITMAP_LAST_ERR=m||''; throw err('rate_limited',m) }
+    if(!res.ok){ var d=''; try{d=(await res.json()).error}catch(e){ d='서버 응답 '+res.status+(res.status===504?' (시간 초과)':'') } console.warn('[IT MAP] /api/ai',res.status,d); window.ITMAP_LAST_ERR=d||('서버 응답 '+res.status); throw err('upstream_error',d) }
     var reader=res.body.getReader(), dec=new TextDecoder(), text='', truncated=false;
     try{
       for(;;){
@@ -33,8 +33,9 @@
         if(text.indexOf(TR)>=0){ truncated=true; text=text.split(TR).join(''); chunk=chunk.split(TR).join('') }
         if(opts.onText&&text) try{opts.onText({text:text,delta:chunk})}catch(e){}
       }
-    }catch(e){ throw err(e&&e.name==='AbortError'?'cancelled':'upstream_error',String(e),text) }
-    if(!text.trim()) throw err('empty_completion');
+    }catch(e){ if(!(e&&e.name==='AbortError')) window.ITMAP_LAST_ERR='응답이 중간에 끊겼어요 (시간 초과일 수 있어요)'; throw err(e&&e.name==='AbortError'?'cancelled':'upstream_error',String(e),text) }
+    if(!text.trim()){ window.ITMAP_LAST_ERR='AI 응답이 비어 있어요. 잠시 후 다시 시도해 주세요.'; throw err('empty_completion') }
+    window.ITMAP_LAST_ERR='';
     return {text:text,truncated:truncated};
   }
   function parseJSON(text){
@@ -1197,6 +1198,7 @@ let GEN=null; // {kind,q,busy,ctl,start} | {kind,q,error}
 let genTick=null;
 function nodeListText(){return NODES.map(n=>`${n.id}: ${n.name} — ${n.summary}`).join('\n')}
 function genErr(code){
+  if(window.ITMAP_STANDALONE&&window.ITMAP_LAST_ERR&&code!=='cancelled'&&code!=='not_granted') return window.ITMAP_LAST_ERR;
   return ({not_granted:'AI 사용이 허용되지 않았어요. 다음에 요청할 때 허용해 주세요.',sampling_disabled:'이 계정에서는 AI 생성을 사용할 수 없어요.',rate_limited:'요청이 많아요. 잠시 후 다시 시도해 주세요.',invalid_json:'AI 응답을 해석하지 못했어요. 다시 시도해 주세요.',empty_completion:'AI 응답이 비어 있어요. 다시 시도해 주세요.',bad_shape:'AI 응답에 필요한 내용이 빠져 있어요. 다시 시도해 주세요.',refused:'이 요청은 처리할 수 없어요. 다른 표현으로 검색해 보세요.',session_expired:'로그인이 만료되었어요. 페이지를 새로 열어 주세요.'})[code]||'생성에 실패했어요. 다시 시도해 주세요.';
 }
 async function genConcept(q,signal,parent){
