@@ -20,3 +20,11 @@
 
 ## 저장
 - 공부 기록은 브라우저(localStorage)에 저장됩니다. My Knowledge 화면의 **백업 내려받기 / 불러오기**로 다른 기기에 옮길 수 있습니다.
+
+## PC·휴대폰 동기화 (선택, 무료)
+1. Vercel 프로젝트 → **Storage** 탭 → **Create Database** → **Upstash (Redis)** 선택 → **Free** 플랜으로 생성
+2. 생성 화면에서 이 프로젝트(`itmap`)에 **Connect** → 환경 변수(`KV_REST_API_URL`, `KV_REST_API_TOKEN` 등)가 자동으로 추가됩니다
+3. **Deployments → 최신 배포 → Redeploy**
+4. 확인: `https://내주소/api/sync?check=1` → `{"storage":true}`
+- 기기마다 처음 열 때 비밀번호(SITE_PASSWORD)를 한 번 물어봅니다. 그 뒤로 기록이 자동으로 올라가고 받아집니다.
+- 처음 동기화할 때 각 기기에 있던 기록은 합쳐집니다.

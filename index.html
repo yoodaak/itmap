@@ -52,6 +52,91 @@
   window.claude={use:async function(name){return name==='sample'?sample:null}};
 })();
 
+/* IT MAP device sync: mirrors browser records to /api/sync (Upstash Redis) so PC and phone share one record. */
+(function(){
+  function g(k,d){try{var v=localStorage.getItem('itmap.'+k);return v?JSON.parse(v):d}catch(e){return d}}
+  function s(k,v){try{localStorage.setItem('itmap.'+k,JSON.stringify(v))}catch(e){}}
+  var st={enabled:false,state:'checking',last:g('syncLast',null),error:''};
+  var queue=g('syncQueue',{}), meta=g('syncMeta',{}), timer=null, flushing=false;
+  function pw(){try{return localStorage.getItem('itmap.sitePassword')||''}catch(e){return ''}}
+  async function api(method,body,qs,retried){
+    var r=await fetch('/api/sync'+(qs||''),{method:method,headers:{'content-type':'application/json','x-site-password':pw()},body:body?JSON.stringify(body):undefined});
+    if(r.status===401){
+      try{localStorage.removeItem('itmap.sitePassword')}catch(e){}
+      var p=window.prompt(retried?'비밀번호가 맞지 않아요. 다시 입력하세요.':'PC와 휴대폰 기록을 동기화하려면 IT MAP 비밀번호를 입력하세요.');
+      if(p){try{localStorage.setItem('itmap.sitePassword',p)}catch(e){} return api(method,body,qs,true)}
+      throw {code:'auth'};
+    }
+    if(r.status===501) throw {code:'nostore'};
+    if(!r.ok) throw {code:'http',status:r.status};
+    return r.json();
+  }
+  function applyRemote(changes){
+    var custom=g('custom',{}), n=0, status=null, notes=null;
+    changes.forEach(function(c){
+      if((meta[c.id]||0)>=c.t) return;
+      if(queue[c.id]&&queue[c.id].t>=c.t) return;
+      meta[c.id]=c.t; n++;
+      if(c.id==='__status') status=(c.d&&c.d.map)||{};
+      else if(c.id==='__notes') notes=(c.d&&c.d.map)||{};
+      else if(c.d) custom[c.id]=c.d; else delete custom[c.id];
+    });
+    if(n){ s('custom',custom); if(status){s('status',status);s('statusExample',false)} if(notes) s('notes',notes); s('syncMeta',meta); }
+    return n;
+  }
+  function push(id,d){
+    var t=Date.now(); if(meta[id]&&meta[id]>=t) t=meta[id]+1;
+    queue[id]={d:d==null?null:d,t:t}; meta[id]=t; s('syncQueue',queue); s('syncMeta',meta);
+    if(st.enabled){clearTimeout(timer);timer=setTimeout(flush,1500)}
+  }
+  async function flush(){
+    if(flushing||!st.enabled) return; var ids=Object.keys(queue); if(!ids.length) return;
+    flushing=true; var batch=[],size=0;
+    for(var i=0;i<ids.length;i++){var c={id:ids[i],d:queue[ids[i]].d,t:queue[ids[i]].t};var z=JSON.stringify(c).length;if(batch.length&&size+z>700000)break;batch.push(c);size+=z}
+    try{
+      await api('POST',{changes:batch});
+      batch.forEach(function(c){if(queue[c.id]&&queue[c.id].t===c.t)delete queue[c.id]}); s('syncQueue',queue);
+      st.last=new Date().toISOString(); s('syncLast',st.last); st.state='ok'; st.error='';
+      flushing=false; if(Object.keys(queue).length) setTimeout(flush,300);
+    }catch(e){ flushing=false; st.state='error'; st.error=e.code==='auth'?'비밀번호가 필요해요':'업로드하지 못했어요. 잠시 뒤 다시 시도해요'; setTimeout(flush,20000); }
+  }
+  async function pull(){ var r=await api('GET',null,'?since='+(g('syncSince',0)||0)); var n=applyRemote(r.changes||[]); s('syncSince',r.now); st.last=new Date().toISOString(); s('syncLast',st.last); return n; }
+  function pushAllLocal(skip){
+    var custom=g('custom',{}); Object.keys(custom).forEach(function(id){ if(!skip||!skip[id]) push(id,custom[id]) });
+  }
+  async function firstSync(){
+    var localCustom=g('custom',{}), localStatus=g('status',null), localEx=g('statusExample',false), localNotes=g('notes',{});
+    var r=await api('GET',null,'?since=0'); var remote=r.changes||[]; var rid={}; remote.forEach(function(c){rid[c.id]=c});
+    applyRemote(remote);
+    var rs=rid.__status&&rid.__status.d&&rid.__status.d.map||{}, rn=rid.__notes&&rid.__notes.d&&rid.__notes.d.map||{};
+    var ms=Object.assign({},rs,(localEx||!localStatus)?{}:localStatus), mn=Object.assign({},rn,localNotes);
+    if(Object.keys(ms).length){s('status',ms);s('statusExample',false);push('__status',{kind:'status',map:ms})}
+    if(Object.keys(mn).length){s('notes',mn);push('__notes',{kind:'notes',map:mn})}
+    Object.keys(localCustom).forEach(function(id){ if(!rid[id]) push(id,localCustom[id]) });
+    s('syncSince',r.now); s('syncInit',true);
+  }
+  window.ITMAP_SYNC={
+    push:push,
+    status:function(){return st},
+    now:async function(){ if(!st.enabled) return 0; var n=await pull(); await flush(); return n; }
+  };
+  window.ITMAP_READY=(async function(){
+    try{
+      var chk=await fetch('/api/sync?check=1').then(function(r){return r.json()}).catch(function(){return {}});
+      if(!chk.storage){st.state='off';return}
+      st.enabled=true;
+      if(!g('syncInit',false)) await firstSync(); else await pull();
+      if(g('syncForcePush',false)){ pushAllLocal(); var stt=g('status',null); if(stt) push('__status',{kind:'status',map:stt}); push('__notes',{kind:'notes',map:g('notes',{})}); s('syncForcePush',false); }
+      st.state='ok'; flush();
+    }catch(e){ st.state=e&&e.code==='nostore'?'off':'error'; st.error=e&&e.code==='auth'?'비밀번호가 필요해요':'동기화 서버에 연결하지 못했어요'; }
+  })();
+  document.addEventListener('visibilitychange',function(){
+    if(!st.enabled) return;
+    if(document.visibilityState==='hidden') flush();
+    else pull().then(function(n){ if(n&&window.ITMAP_ON_REMOTE) window.ITMAP_ON_REMOTE(n) }).catch(function(){});
+  });
+})();
+
 </script>
 </head>
 <body>
@@ -612,6 +697,9 @@ table.cmp tbody tr:last-child th,table.cmp tbody tr:last-child td{border-bottom:
 .lvbar{height:10px;background:var(--surface-2);border-radius:5px;overflow:hidden}
 .lvbar i{display:block;height:100%;background:var(--accent);border-radius:5px}
 @media (max-width:760px){.progrid{grid-template-columns:1fr}}
+.syncline{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:13px;padding:8px 10px;border-radius:8px;background:var(--surface-2)}
+.syncline.ok{background:var(--ok-soft);color:var(--ok-text)}
+.syncline.error{background:var(--err-soft);color:var(--err-text)}
 /* map */
 .map-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .map-top h1{font-size:22px}
@@ -1122,6 +1210,7 @@ let CUSTOM = store.get('custom',{}); // docId -> doc (local copy / fallback)
 function persist(docId,data){
   if(data) CUSTOM[docId]=data; else delete CUSTOM[docId];
   store.set('custom',CUSTOM);
+  if(window.ITMAP_SYNC) window.ITMAP_SYNC.push(docId,data||null);
   if(CLOUD.col){const ref=CLOUD.col.doc(docId);return (data?ref.set(data):ref.delete()).catch(()=>toast('저장하지 못했습니다. 잠시 후 다시 시도해 주세요.'))}
   return Promise.resolve();
 }
@@ -1129,9 +1218,10 @@ function setStatus(id,s){
   if(s==='none') delete STATUS[id]; else STATUS[id]=s; STATUS_EXAMPLE=false;
   store.set('status',STATUS); store.set('statusExample',false);
   if(CLOUD.col) CLOUD.col.doc('status').set({kind:'status',map:STATUS}).catch(()=>{});
+  if(window.ITMAP_SYNC) window.ITMAP_SYNC.push('__status',{kind:'status',map:STATUS});
 }
 let noteTimer=null;
-function saveNotes(){store.set('notes',NOTES);clearTimeout(noteTimer);noteTimer=setTimeout(()=>{if(CLOUD.col)CLOUD.col.doc('notes').set({kind:'notes',map:NOTES}).catch(()=>{})},1200)}
+function saveNotes(){store.set('notes',NOTES);clearTimeout(noteTimer);noteTimer=setTimeout(()=>{if(CLOUD.col)CLOUD.col.doc('notes').set({kind:'notes',map:NOTES}).catch(()=>{});if(window.ITMAP_SYNC)window.ITMAP_SYNC.push('__notes',{kind:'notes',map:NOTES})},1200)}
 function loadCustom(docs){
   const added=[];
   Object.entries(docs).forEach(([k,d])=>{ if(d&&d.kind==='node'&&d.node&&d.node.id&&!byId[d.node.id]){const n={...d.node,ai:true,docId:k};NODES.push(n);byId[n.id]=n;added.push(d)} });
@@ -1897,7 +1987,7 @@ function viewMe(){
   <div class="me-grid">
     <div class="mapwrap" id="mewrap"><div id="panel"></div></div>
     <div class="stack">
-      ${window.ITMAP_STANDALONE?`<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><span class="label">백업</span><p class="muted" style="font-size:13px">공부 기록은 이 브라우저에 저장돼요. 다른 기기로 옮기거나 잃어버리지 않게 가끔 백업해 두세요.</p><div class="aibtns"><button class="btn sm primary" id="bkExport">백업 내려받기</button><label class="btn sm" for="bkImport" style="cursor:pointer">백업 불러오기</label><input type="file" id="bkImport" accept="application/json,.json" hidden></div></div>`:''}
+      ${window.ITMAP_STANDALONE?`<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><span class="label">백업 · 동기화</span>${syncLine()}<p class="muted" style="font-size:13px">공부 기록은 이 브라우저에 저장돼요. 다른 기기로 옮기거나 잃어버리지 않게 가끔 백업해 두세요.</p><div class="aibtns"><button class="btn sm primary" id="bkExport">백업 내려받기</button><label class="btn sm" for="bkImport" style="cursor:pointer">백업 불러오기</label><input type="file" id="bkImport" accept="application/json,.json" hidden></div></div>`:''}
       <button class="card ritem" data-nav="notes" style="padding:14px 16px"><span class="rname">내 노트</span><span class="rsum">${INSIGHTS.length}개 · 들은 내용 기록하기</span></button>
       <div class="counts">${['known','learning','weak','none'].map(k=>`<div><b>${c[k]}</b><span><i class="dot s-${k}"></i>${ST_LABEL[k]}</span></div>`).join('')}</div>
       <div class="card stack" style="padding:16px;gap:10px"><span class="label">연결이 약한 곳</span>
@@ -1921,10 +2011,11 @@ after.me=()=>{
       if(!window.confirm('백업을 불러오면 지금 이 브라우저의 기록이 백업 내용으로 바뀝니다. 계속할까요?')) return;
       Object.keys(localStorage).filter(k=>k.startsWith('itmap.')&&k!=='itmap.sitePassword').forEach(k=>localStorage.removeItem(k));
       Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('itmap.')) localStorage.setItem(k,v) });
+      localStorage.setItem('itmap.syncForcePush','true');
       location.reload();
     }catch(err){ toast('IT MAP 백업 파일이 아니거나 읽을 수 없어요.') }
   });
-  $('#resetStatus')?.addEventListener('click',()=>{STATUS={};STATUS_EXAMPLE=false;store.set('status',STATUS);store.set('statusExample',false);render()});
+  $('#resetStatus')?.addEventListener('click',()=>{STATUS={};STATUS_EXAMPLE=false;store.set('status',STATUS);store.set('statusExample',false);if(window.ITMAP_SYNC)window.ITMAP_SYNC.push('__status',{kind:'status',map:STATUS});render()});
   const wrap=$('#mewrap'),panel=$('#panel');
   const show=id=>{panel.innerHTML=id?nodePanel(id):''};
   graph=forceGraph(wrap,{nodes:NODES,links:EDGES,cls:'status',nodeClass:d=>'st-'+(STATUS[d.id]||'none')+(d.ai?' ai':''),onSelect:show,onOpen:id=>go('detail',{id}),onEdge:e=>{panel.innerHTML=edgePanel(e)}});
@@ -3127,9 +3218,30 @@ after.thinkopen=()=>{
   });
 };
 
-loadCustom(CUSTOM);
-go('home');
-initCloud();
+function syncLine(){
+  if(!window.ITMAP_SYNC) return '';
+  const s=window.ITMAP_SYNC.status();
+  const msg={ok:'☁️ PC·휴대폰 동기화 켜짐',off:'동기화 꺼짐 — Vercel에 저장소(Upstash Redis)를 연결하면 켜져요',error:'동기화 오류: '+(s.error||''),checking:'동기화 확인 중…'}[s.state]||'';
+  return `<div class="syncline ${s.state}"><span>${esc(msg)}${s.state==='ok'&&s.last?` · 마지막 ${new Date(s.last).toTimeString().slice(0,5)}`:''}</span>${s.enabled?'<button class="btn sm" id="syncNow">지금 동기화</button>':''}</div>`;
+}
+document.addEventListener('click',async e=>{
+  if(!e.target.closest('#syncNow')||!window.ITMAP_SYNC) return;
+  const b=e.target.closest('#syncNow'); b.disabled=true; b.textContent='동기화 중…';
+  try{ const n=await window.ITMAP_SYNC.now(); if(n){toast(`다른 기기에서 바뀐 내용 ${n}개를 받았어요. 새로고침하면 반영돼요.`,'<button class="btn sm primary" onclick="location.reload()">새로고침</button>')} else toast('이미 최신 상태예요.') }catch(err){ toast('동기화하지 못했어요. 잠시 후 다시 시도해 주세요.') }
+  b.disabled=false; b.textContent='지금 동기화';
+});
+window.ITMAP_ON_REMOTE=n=>toast(`다른 기기에서 바뀐 내용 ${n}개가 있어요.`,'<button class="btn sm primary" onclick="location.reload()">새로고침</button>');
+async function boot(){
+  if(window.ITMAP_READY){
+    $('#main').innerHTML='<div class="wrap"><p class="muted" style="padding:48px 0">기록을 동기화하는 중…</p></div>';
+    await Promise.race([window.ITMAP_READY,new Promise(r=>setTimeout(r,6000))]);
+    CUSTOM=store.get('custom',{});
+    const s=store.get('status',null); if(s){STATUS=s;STATUS_EXAMPLE=store.get('statusExample',false)}
+    NOTES=store.get('notes',{});
+  }
+  loadCustom(CUSTOM); go('home'); initCloud();
+}
+boot();
 </script>
 
 </body>
