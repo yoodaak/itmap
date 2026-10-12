@@ -3,9 +3,10 @@
 // USERS          → extra people, each with their own separate data: "동생:비번1, 친구:비번2"
 export function users() {
   const m = new Map();
-  String(process.env.USERS || '').split(/[,\n;]/).forEach((p) => {
-    const i = p.indexOf(':');
-    if (i > 0) { const n = p.slice(0, i).trim(), w = p.slice(i + 1).trim(); if (n && w) m.set(n, w); }
+  String(process.env.USERS || '').replace(/[\u200b\ufeff]/g, '').split(/[,，\n;]/).forEach((p) => {
+    const s = p.replace(/：/g, ':').replace(/^["'\s]+|["'\s]+$/g, '');
+    const i = s.search(/[:=]/);
+    if (i > 0) { const n = s.slice(0, i).trim(), w = s.slice(i + 1).trim(); if (n && w) m.set(n.toLowerCase(), w); }
   });
   return m;
 }
@@ -16,8 +17,9 @@ export function whoami(request) {
   try { name = decodeURIComponent(request.headers.get('x-itmap-user') || '').trim(); } catch {}
   const pw = request.headers.get('x-site-password') || '';
   const us = users();
-  if (name && us.has(name) && us.get(name) === pw) return { name, owner: false };
-  if (process.env.SITE_PASSWORD && pw === process.env.SITE_PASSWORD) return { name: name || '나', owner: true };
+  const key = name.toLowerCase();
+  if (name && us.has(key) && us.get(key) === pw.trim()) return { name, owner: false };
+  if (process.env.SITE_PASSWORD && pw.trim() === process.env.SITE_PASSWORD.trim()) return { name: name || '나', owner: true };
   return null;
 }
 export const dataKey = (u) => (u.owner ? 'itmap:docs' : 'itmap:docs:u:' + encodeURIComponent(u.name));
