@@ -1,11 +1,17 @@
 // Shared login check for IT MAP functions (files starting with "_" are not deployed as routes).
 // SITE_PASSWORD  → the owner's password (owner keeps the original data space)
 // USERS          → extra people, each with their own separate data: "동생:비번1, 친구:비번2"
+export function usersRaw() {
+  if (process.env.USERS) return process.env.USERS;
+  const k = Object.keys(process.env).find((x) => x.trim().toUpperCase() === 'USERS');
+  return k ? process.env[k] : '';
+}
 export function users() {
   const m = new Map();
-  String(process.env.USERS || '').replace(/[\u200b\ufeff]/g, '').split(/[,，\n;]/).forEach((p) => {
+  String(usersRaw() || '').replace(/[\u200b\ufeff]/g, '').split(/[,，\n;]/).forEach((p) => {
     const s = p.replace(/：/g, ':').replace(/^["'\s]+|["'\s]+$/g, '');
-    const i = s.search(/[:=]/);
+    let i = s.search(/[:=]/);
+    if (i < 0) i = s.search(/\s/); // "동생 1234" 처럼 띄어쓰기로 쓴 경우도 허용
     if (i > 0) { const n = s.slice(0, i).trim(), w = s.slice(i + 1).trim(); if (n && w) m.set(n.toLowerCase(), w); }
   });
   return m;
