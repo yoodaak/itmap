@@ -72,7 +72,7 @@ export async function GET(request) {
   const info = { ok: true, hasKey: !!process.env.GEMINI_API_KEY, passwordProtected: authRequired(), model: process.env.GEMINI_MODEL || 'gemini-flash-latest' };
   if (url.searchParams.get('test') !== '1') return json(info);
   const tu = url.searchParams.get('user') || '';
-  if (!whoami(new Request(request.url, { headers: { 'x-site-password': url.searchParams.get('pw') || '', 'x-itmap-user': encodeURIComponent(tu) } }))) return json({ ...info, test: '비밀번호(pw)가 맞지 않아요. 주소 끝에 &pw=내비밀번호 를 붙여 주세요.' }, 401);
+  if (!(await whoami(new Request(request.url, { headers: { 'x-site-password': url.searchParams.get('pw') || '', 'x-itmap-user': encodeURIComponent(tu) } })))) return json({ ...info, test: '비밀번호(pw)가 맞지 않아요. 주소 끝에 &pw=내비밀번호 를 붙여 주세요.' }, 401);
   if (!info.hasKey) return json({ ...info, test: 'GEMINI_API_KEY 가 없어요.' }, 500);
   const { res: r, model, error } = await callGemini('generateContent', { contents: [{ role: 'user', parts: [{ text: '"OK" 한 단어로만 답하세요.' }] }], generationConfig: { maxOutputTokens: 256 } });
   if (error) return json({ ...info, test: '실패', status: error.status, triedModels: MODELS(), reason: explain(error.status, error.detail), raw: error.detail.slice(0, 400) }, 200);
@@ -84,7 +84,7 @@ export async function GET(request) {
 export async function POST(request) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return json({ error: 'GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.' }, 500);
-  if (!whoami(request)) return json({ error: 'unauthorized' }, 401);
+  if (!(await whoami(request))) return json({ error: 'unauthorized' }, 401);
 
   let body;
   try { body = await request.json(); } catch { return json({ error: 'bad request' }, 400); }

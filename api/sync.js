@@ -2,36 +2,17 @@
 // Connect a store in Vercel → Storage → Upstash Redis (Marketplace). It injects KV_REST_API_URL / KV_REST_API_TOKEN
 // (or UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN); both naming styles are detected.
 // Protected by the same SITE_PASSWORD as /api/ai.
-import { whoami, dataKey } from './_auth.js';
+import { whoami, dataKey, store, redis } from './_auth.js';
 export const config = { maxDuration: 30 };
 
 const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 
-function store() {
-  const e = process.env;
-  let url = e.UPSTASH_REDIS_REST_URL || e.KV_REST_API_URL;
-  let token = e.UPSTASH_REDIS_REST_TOKEN || e.KV_REST_API_TOKEN;
-  if (!url || !token) {
-    for (const k of Object.keys(e)) {
-      if (!url && /(KV_REST_API_URL|REDIS_REST_URL)$/.test(k)) url = e[k];
-      if (!token && /(KV_REST_API_TOKEN|REDIS_REST_TOKEN)$/.test(k) && !/READ_ONLY/.test(k)) token = e[k];
-    }
-  }
-  return url && token ? { url: url.replace(/\/$/, ''), token } : null;
-}
-async function redis(cfg, cmd) {
-  const r = await fetch(cfg.url, { method: 'POST', headers: { authorization: 'Bearer ' + cfg.token, 'content-type': 'application/json' }, body: JSON.stringify(cmd) });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok || j.error) throw new Error(j.error || 'redis ' + r.status);
-  return j.result;
-}
-
 export async function GET(request) {
   const url = new URL(request.url);
   const cfg = store();
   if (url.searchParams.get('check') === '1') return json({ storage: !!cfg });
-  const me = whoami(request);
+  const me = await whoami(request);
   if (!me) return json({ error: 'unauthorized' }, 401);
   if (!cfg) return json({ error: '저장소(Upstash Redis)가 연결되지 않았어요.' }, 501);
   const KEY = dataKey(me);
@@ -47,7 +28,7 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const me = whoami(request);
+  const me = await whoami(request);
   if (!me) return json({ error: 'unauthorized' }, 401);
   const KEY = dataKey(me);
   const cfg = store();

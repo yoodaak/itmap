@@ -754,6 +754,7 @@ table.cmp tbody tr:last-child th,table.cmp tbody tr:last-child td{border-bottom:
 .crumbs button{border:0;background:none;padding:0;color:var(--primary);font-weight:600}
 .crumbs .cur{color:var(--text);font-weight:600}
 .graph .node.cluster circle{stroke-width:5;fill:var(--accent-soft)}
+.urow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;padding:6px 0;border-bottom:1px dashed var(--line)}
 /* map */
 .map-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .map-top h1{font-size:22px}
@@ -2056,6 +2057,7 @@ function viewMe(){
     <div class="mapwrap" id="mewrap"><div id="panel"></div></div>
     <div class="stack">
       ${window.ITMAP_STANDALONE?`<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><span class="label">백업 · 동기화</span>${window.ITMAP_USER&&!window.ITMAP_USER.open?`<div class="userline"><span>👤 <b>${esc(window.ITMAP_USER.name||"나")}</b> 로그인 중</span><button class="linkbtn" id="logout">로그아웃 · 사용자 전환</button></div>`:""}${syncLine()}<p class="muted" style="font-size:13px">공부 기록은 이 브라우저에 저장돼요. 다른 기기로 옮기거나 잃어버리지 않게 가끔 백업해 두세요.</p><div class="aibtns"><button class="btn sm primary" id="bkExport">백업 내려받기</button><label class="btn sm" for="bkImport" style="cursor:pointer">백업 불러오기</label><input type="file" id="bkImport" accept="application/json,.json" hidden></div></div>`:''}
+      ${window.ITMAP_USER&&window.ITMAP_USER.owner&&!window.ITMAP_USER.open?userAdminHTML():''}
       <button class="card ritem" data-nav="notes" style="padding:14px 16px"><span class="rname">내 노트</span><span class="rsum">${INSIGHTS.length}개 · 들은 내용 기록하기</span></button>
       <div class="counts">${['known','learning','weak','none'].map(k=>`<div><b>${c[k]}</b><span><i class="dot s-${k}"></i>${ST_LABEL[k]}</span></div>`).join('')}</div>
       <div class="card stack" style="padding:16px;gap:10px"><span class="label">연결이 약한 곳</span>
@@ -2068,8 +2070,30 @@ function viewMe(){
   </div></div>`;
 }
 const NSX=()=>window.ITMAP_NS||'itmap.';
+let UADM={list:null,env:[],error:'',busy:false};
+async function uadm(body){const r=await fetch('/api/auth',{method:'POST',headers:window.ITMAP_HEADERS(),body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('오류 '+r.status));return j}
+function userAdminHTML(){
+  const L=UADM.list;
+  return `<div class="card" id="uadm" style="padding:16px;display:flex;flex-direction:column;gap:10px"><span class="label">👥 사용자 관리</span>
+    <p class="muted" style="font-size:12.5px">여기서 만든 사람은 자기 이름과 비밀번호로 로그인하고, 기록은 각자 따로 저장돼요.</p>
+    ${UADM.error?`<p style="font-size:13px;color:var(--err-text)">${esc(UADM.error)}</p>`:''}
+    ${L===null?'<p class="muted" style="font-size:13px">불러오는 중…</p>':`<div class="stack" style="gap:6px">${L.length||UADM.env.length?[...L.map(u=>`<div class="urow"><span>👤 <b>${esc(u.name)}</b></span><span><button class="linkbtn" data-ureset="${esc(u.name)}">비밀번호 재설정</button><button class="linkbtn" data-udel="${esc(u.name)}">삭제</button></span></div>`),...UADM.env.map(n=>`<div class="urow"><span>👤 <b>${esc(n)}</b></span><span class="muted" style="font-size:12px">Vercel USERS 변수</span></div>`)].join(''):'<p class="muted" style="font-size:13px">아직 추가한 사람이 없어요.</p>'}</div>`}
+    <form id="uaddForm" class="caprow"><label class="sr" for="uName">이름</label><input class="fld" id="uName" placeholder="이름 (예: 동생)" style="flex:1 1 100px" autocomplete="off"><label class="sr" for="uPw">비밀번호</label><input class="fld" id="uPw" placeholder="비밀번호 4자 이상" style="flex:1 1 120px" autocomplete="new-password"><button class="btn sm primary" ${UADM.busy?'disabled':''}>추가</button></form>
+  </div>`;
+}
+async function loadUadm(){ try{const j=await uadm({action:'list'});UADM.list=j.users||[];UADM.env=j.envUsers||[];UADM.error=''}catch(e){UADM.list=[];UADM.error=e.message} const el=$('#uadm'); if(el) el.outerHTML=userAdminHTML(); wireUadm() }
+function wireUadm(){
+  $('#uaddForm')?.addEventListener('submit',async e=>{e.preventDefault();const name=$('#uName').value.trim(),pw=$('#uPw').value.trim();if(!name||!pw)return;
+    UADM.busy=true;try{await uadm({action:'add',name,pw});toast(`${name} 계정을 만들었어요. 이름과 비밀번호를 전해 주세요.`)}catch(err){UADM.error=err.message}UADM.busy=false;loadUadm()});
+}
+document.addEventListener('click',async e=>{
+  const d=e.target.closest('[data-udel]'); if(d){ if(!d.dataset.armed){d.dataset.armed='1';d.textContent='한 번 더 누르면 삭제';d.style.color='var(--err-text)';return} try{await uadm({action:'remove',name:d.dataset.udel});toast('삭제했어요. 그 사람의 공부 기록은 저장소에 남아 있어요.')}catch(err){UADM.error=err.message} loadUadm(); return }
+  const r=e.target.closest('[data-ureset]'); if(r){ const box=r.closest('.urow'); if(box.querySelector('input'))return; box.insertAdjacentHTML('beforeend',`<form class="caprow ureset" style="flex-basis:100%"><input class="fld" placeholder="새 비밀번호" style="flex:1" autocomplete="new-password"><button class="btn sm">저장</button></form>`);
+    box.querySelector('form').addEventListener('submit',async ev=>{ev.preventDefault();const pw=box.querySelector('input').value.trim();if(!pw)return;try{await uadm({action:'reset',name:r.dataset.ureset,pw});toast('비밀번호를 바꿨어요.')}catch(err){UADM.error=err.message}loadUadm()}); box.querySelector('input').focus(); }
+});
 function myKeys(){const ns=NSX();const out=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith(ns))continue;if(ns==='itmap.'&&(k.startsWith('itmap.u.')||k==='itmap.auth'||k==='itmap.sitePassword'))continue;out.push(k)}return out}
 after.me=()=>{
+  if($('#uadm')){ if(UADM.list===null) loadUadm(); else wireUadm(); }
   $('#logout')?.addEventListener('click',()=>window.ITMAP_LOGOUT&&window.ITMAP_LOGOUT());
   $('#bkExport')?.addEventListener('click',()=>{
     const data={}; myKeys().forEach(k=>{data[k.slice(NSX().length)]=localStorage.getItem(k)});
