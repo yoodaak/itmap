@@ -749,6 +749,11 @@ table.cmp tbody tr:last-child th,table.cmp tbody tr:last-child td{border-bottom:
 .topicbody .md{max-width:none}
 .graph .node.root circle{stroke-width:4}
 @media (max-width:900px){.topicgrid{grid-template-columns:minmax(0,1fr)}}
+.kidcount{font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:0 6px;margin-left:2px}
+.crumbs{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.crumbs button{border:0;background:none;padding:0;color:var(--primary);font-weight:600}
+.crumbs .cur{color:var(--text);font-weight:600}
+.graph .node.cluster circle{stroke-width:5;fill:var(--accent-soft)}
 /* map */
 .map-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .map-top h1{font-size:22px}
@@ -1648,7 +1653,7 @@ function viewExplore(){
 }
 function browse(){
   return `<div class="section-title" style="margin-top:8px"><h2>분야별로 둘러보기</h2><span class="muted" style="font-size:13px">하나의 개념이 여러 분야에 속할 수 있습니다</span></div>
-  <div class="catgrid">${Object.entries(CATS).map(([c,v])=>{const ns=NODES.filter(n=>n.cats.includes(c)).sort((a,b)=>a.diff-b.diff);if(!ns.length)return'';return `<div class="card catbox cat-${c}"><h3><span class="dot catdot"></span>${v.name}<span class="muted" style="font-weight:400;font-size:13px">${ns.length}</span></h3><div class="chips">${ns.map(n=>`<button class="chip" data-open="${n.id}">${esc(n.name)}</button>`).join('')}</div></div>`}).join('')}</div>`;
+  <div class="catgrid">${Object.entries(CATS).map(([c,v])=>{const ns=NODES.filter(n=>n.cats.includes(c)&&!parentOf(n.id)).sort((a,b)=>a.diff-b.diff);if(!ns.length)return'';return `<div class="card catbox cat-${c}"><h3><span class="dot catdot"></span>${v.name}<span class="muted" style="font-weight:400;font-size:13px">${ns.length}</span></h3><div class="chips">${ns.map(n=>{const k=childrenOf(n.id).length;return `<button class="chip" data-open="${n.id}">${esc(n.name)}${k?`<span class="kidcount">+${k}</span>`:''}</button>`}).join('')}</div></div>`}).join('')}</div>`;
 }
 after.explore=()=>{
   $('#exSearch').addEventListener('submit',e=>{e.preventDefault();state.q=$('#exQ').value;render()});
@@ -1702,6 +1707,7 @@ function viewDetail(){
     <div style="min-width:0">
       <header class="dhead cat-${catOf(n)}">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${n.cats.map(c=>`<span class="tag cat-${c}"><span class="dot catdot" style="margin-right:6px"></span>${CATS[c].name}</span>`).join('')}${n.ai?'<span class="tag ai" title="AI가 만든 내용입니다. 공식 문서로 한 번 확인해 보세요.">AI 생성</span>':''}${diffDots(n.diff)}</div>
+        ${ancestors(n.id).length?`<div class="crumbs">${ancestors(n.id).reverse().map(a=>`<button data-open="${a}">${esc(byId[a].name)}</button><span>›</span>`).join('')}<span class="cur">${esc(n.name)}</span></div>`:''}
         <h1>${esc(n.name)}</h1>
         <div class="full">${esc(n.full)}</div>
         <p class="summary">${esc(n.summary)}</p>
@@ -1717,6 +1723,7 @@ function viewDetail(){
     <aside class="side">
       ${deepSide(n)}
       <div class="card minimap-card"><div class="head"><span class="label">Knowledge Map</span><button class="btn ghost sm" data-mapfocus="${n.id}">크게 보기</button></div>${egoMap(n.id)}</div>
+      ${parentCard(n)}
       <div class="card" style="padding:16px"><span class="label">내 이해도</span><div class="statuspick" style="margin-top:10px">${['known','learning','weak','none'].map(k=>`<button class="${st===k?'on':''}" data-status="${k}"><span class="dot s-${k}"></span>${ST_LABEL[k]}</button>`).join('')}</div>
         <div class="lvline">${lvBadge(n.id)}<button class="linkbtn" data-und="${n.id}">내 말로 설명하기 →</button></div>
         ${openGaps().filter(g=>g.node===n.id).length?`<div class="sidegaps"><span class="label">🕳️ 이 개념의 지식 공백</span>${openGaps().filter(g=>g.node===n.id).slice(0,3).map(g=>`<button class="linkbtn" data-space="gaps">· ${esc(g.text)}</button>`).join('')}</div>`:''}</div>
@@ -1729,6 +1736,7 @@ function viewDetail(){
 }
 after.detail=()=>{
   const n=byId[state.id];
+  $('#parentSel')?.addEventListener('change',e=>{setParent(n.id,e.target.value);toast(e.target.value?`${byId[e.target.value].name}의 하위 개념으로 묶었어요.`:'큰 개념으로 두었어요.');rerender()});
   wireCapture('detail',n.id);
   $('#addEdgeBtn')?.addEventListener('click',()=>{state.addEdge=true;rerender();$('#efTarget')?.focus()});
   $('#efCancel')?.addEventListener('click',()=>{state.addEdge=false;rerender()});
@@ -1861,6 +1869,7 @@ function viewMap(){
   const scN=sc?scopeSet(sc,!!state.scopeNb).size:NODES.length;
   return `<div class="map-top"><div><span class="eyebrow">Knowledge Map</span><h1>${sc?`${esc(byId[sc].name)} 지도`:'지식 지도'} <span class="muted" style="font-size:14px;font-weight:500">개념 ${scN}${sc?` / 전체 ${NODES.length}`:` · 연결 ${EDGES.length}`}</span></h1></div>
    <div class="scopebar"><label class="sr" for="scopeSel">보기 범위</label><select class="fld" id="scopeSel"><option value="">전체 지도</option>${roots.map(x=>`<option value="${x.n.id}" ${sc===x.n.id?'selected':''}>${esc(x.n.name)}만 보기 (${x.c})</option>`).join('')}</select>
+     ${!sc&&NODES.some(n=>parentOf(n.id))?`<label class="chk" style="align-items:center;font-size:13px"><input type="checkbox" id="expandAll" ${state.expandAll?'checked':''}> 하위 개념 모두 펼치기</label>`:''}
      ${sc?`<label class="chk" style="align-items:center;font-size:13px"><input type="checkbox" id="scopeNb" ${state.scopeNb?'checked':''}> 바로 연결된 개념도 함께</label><button class="btn sm" data-topic="${sc}">🧩 서비스 비교 · 관계</button>`:''}</div>
    <div class="filters" id="filters"><button class="on" data-cat="">전체</button>${cats.map(c=>`<button data-cat="${c}" class="cat-${c}"><span class="dot catdot"></span>${CATS[c].name}</button>`).join('')}</div></div>
    <div class="mapwrap" id="mapwrap">${legendHTML()}
@@ -1879,7 +1888,7 @@ function nodePanel(id){
    <div class="oneliner" style="font-size:14.5px;padding:12px 14px">${esc(n.one)}</div>
    <div style="font-size:13px;color:var(--muted)">이해하려면 <b style="color:var(--text)">${pre.length}</b> · 이해하면 <b style="color:var(--text)">${nx.length}</b> · 함께 <b style="color:var(--text)">${rel.length}</b>${INSIGHTS.filter(i=>i.node===id).length?` · 내 노트 <b style="color:var(--text)">${INSIGHTS.filter(i=>i.node===id).length}</b>`:''}</div>
    ${pre.length?`<div class="chips">${pre.map(p=>`<button class="chip" data-panelnode="${p.id}">${esc(byId[p.id].name)}</button>`).join('')}</div>`:''}
-   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" data-open="${id}">자세히 학습하기</button>${descendants(id).size>=3?`<button class="btn sm" data-scope="${id}">이 주제만 보기</button>`:''}<button class="btn sm" data-deep="${id}">깊이 공부하기</button></div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" data-open="${id}">자세히 학습하기</button>${childrenOf(id).length&&state.view==='map'&&!state.scope&&!state.expandAll?`<button class="btn sm" data-expand="${id}">${EXPANDED.has(id)?'하위 개념 접기':`하위 개념 펼치기 (${childrenOf(id).length})`}</button>`:''}${descendants(id).size>=3?`<button class="btn sm" data-scope="${id}">이 주제만 보기</button>`:''}<button class="btn sm" data-deep="${id}">깊이 공부하기</button></div>
    <div class="statuspick">${['known','learning','weak','none'].map(k=>`<button class="${st===k?'on':''}" data-pstatus="${k}" data-id="${id}"><span class="dot s-${k}"></span>${ST_LABEL[k]}</button>`).join('')}</div>
   </div>`;
 }
@@ -1897,7 +1906,8 @@ after.map=()=>{
   const wrap=$('#mapwrap'), panel=$('#panel');
   const showNode=id=>{panel.innerHTML=id?nodePanel(id):''};
   const sc=state.scope&&has(state.scope)?state.scope:''; const ids=sc?scopeSet(sc,!!state.scopeNb):null;
-  graph=forceGraph(wrap,{nodes:ids?NODES.filter(n=>ids.has(n.id)):NODES,links:ids?EDGES.filter(e=>ids.has(e.s)&&ids.has(e.t)):EDGES,nodeClass:d=>(d.id===sc?'root ':'')+(d.ai?'ai':''),
+  const G=ids?{nodes:NODES.filter(n=>ids.has(n.id)),links:EDGES.filter(e=>ids.has(e.s)&&ids.has(e.t))}:collapsedGraph(NODES,EDGES,!!state.expandAll);
+  graph=forceGraph(wrap,{nodes:G.nodes,links:G.links,nodeClass:d=>(d.id===sc?'root ':'')+(d.cluster?'cluster ':'')+(d.ai?'ai':''),
     onSelect:showNode,onOpen:id=>go('detail',{id}),
     onEdge:e=>{panel.innerHTML=edgePanel(e)}});
   panel.addEventListener('click',ev=>{
@@ -1907,9 +1917,11 @@ after.map=()=>{
   });
   $('#filters').addEventListener('click',ev=>{const b=ev.target.closest('[data-cat]');if(!b)return;$$('#filters button').forEach(x=>x.classList.toggle('on',x===b));graph.filter(b.dataset.cat)});
   $('#zin').onclick=()=>graph.zoomBy(1.3);$('#zout').onclick=()=>graph.zoomBy(1/1.3);$('#zfit').onclick=()=>graph.fit();
+  if(state.focus&&!ids&&hiddenByCollapse(state.focus,!!state.expandAll)){ancestors(state.focus).forEach(a=>EXPANDED.add(a));store.set('mapExpanded',[...EXPANDED]);return go('map',{focus:state.focus})}
   if(state.focus&&(!ids||ids.has(state.focus))){setTimeout(()=>{graph.focus(state.focus);showNode(state.focus)},80)}
   $('#scopeSel')?.addEventListener('change',e=>go('map',{scope:e.target.value,scopeNb:state.scopeNb}));
   $('#scopeNb')?.addEventListener('change',e=>go('map',{scope:state.scope,scopeNb:e.target.checked}));
+  $('#expandAll')?.addEventListener('change',e=>go('map',{expandAll:e.target.checked}));
 };
 
 /* ===================== THINK list ===================== */
@@ -2077,7 +2089,8 @@ after.me=()=>{
   $('#resetStatus')?.addEventListener('click',()=>{STATUS={};STATUS_EXAMPLE=false;store.set('status',STATUS);store.set('statusExample',false);if(window.ITMAP_SYNC)window.ITMAP_SYNC.push('__status',{kind:'status',map:STATUS});render()});
   const wrap=$('#mewrap'),panel=$('#panel');
   const show=id=>{panel.innerHTML=id?nodePanel(id):''};
-  graph=forceGraph(wrap,{nodes:NODES,links:EDGES,cls:'status',nodeClass:d=>'st-'+(STATUS[d.id]||'none')+(d.ai?' ai':''),onSelect:show,onOpen:id=>go('detail',{id}),onEdge:e=>{panel.innerHTML=edgePanel(e)}});
+  const MG=collapsedGraph(NODES,EDGES,false);
+  graph=forceGraph(wrap,{nodes:MG.nodes,links:MG.links,cls:'status',nodeClass:d=>(d.cluster?'cluster ':'')+'st-'+(STATUS[d.id]||'none')+(d.ai?' ai':''),onSelect:show,onOpen:id=>go('detail',{id}),onEdge:e=>{panel.innerHTML=edgePanel(e)}});
   panel.addEventListener('click',ev=>{
     if(ev.target.closest('[data-close]')){panel.innerHTML='';graph.select(null);return}
     const pn=ev.target.closest('[data-panelnode]'); if(pn){graph.focus(pn.dataset.panelnode);show(pn.dataset.panelnode);return}
@@ -2779,6 +2792,7 @@ function loadExtra(k,d){
   else if(d.kind==='rv'&&!REVIEWS.some(r=>r.docId===k)) REVIEWS.push({...d,docId:k});
   else if(d.kind==='th'&&d.id) THINKS[d.id]={...d,docId:k};
   else if(d.kind==='topic'&&d.node) TOPIC[d.node]={...d,docId:k};
+  else if(d.kind==='parents'&&d.map) PARENTS={...d.map};
 }
 
 /* ---------- level ---------- */
@@ -3362,9 +3376,43 @@ after.topic=()=>{
   } else if(wrap) wrap.innerHTML='<div class="emptymap"><p class="muted" style="font-size:13.5px">구성 요소를 지도에 추가하면 여기에 이 주제만의 지도가 그려져요.</p></div>';
 };
 document.addEventListener('click',e=>{
+  const ex=e.target.closest('[data-expand]'); if(ex){toggleExpand(ex.dataset.expand);go('map',{focus:ex.dataset.expand});return}
   const sc=e.target.closest('[data-scope]'); if(sc){go('map',{scope:sc.dataset.scope});return}
   const tp=e.target.closest('[data-topic]'); if(tp){go('topic',{id:tp.dataset.topic});return}
 });
+
+/* ===================== HIERARCHY: keep sub-concepts tucked under their parent ===================== */
+let PARENTS={}; // manual overrides: id -> parentId ('' = top level)
+const EXPANDED=new Set(store.get('mapExpanded',[]));
+function parentOf(id){
+  const n=byId[id]; if(!n) return null;
+  if(Object.prototype.hasOwnProperty.call(PARENTS,id)) return PARENTS[id]&&has(PARENTS[id])&&PARENTS[id]!==id?PARENTS[id]:null;
+  if(n.parent&&has(n.parent)) return n.parent;
+  if(n.ai){ const e=EDGES.find(x=>x.s===id&&x.type==='part_of'&&has(x.t)&&byId[x.t].ai); if(e) return e.t; }
+  return null;
+}
+const childrenOf=id=>NODES.filter(n=>parentOf(n.id)===id);
+function ancestors(id){ const out=[]; let p=parentOf(id), g=0; while(p&&g++<8&&!out.includes(p)){out.push(p);p=parentOf(p)} return out }
+function hiddenByCollapse(id,expandAll){ if(expandAll) return false; return ancestors(id).some(a=>!EXPANDED.has(a)) }
+function collapsedGraph(baseNodes,baseLinks,expandAll){
+  const vis=baseNodes.filter(n=>!hiddenByCollapse(n.id,expandAll)); const ids=new Set(vis.map(n=>n.id));
+  const nodes=vis.map(n=>{const k=childrenOf(n.id).length;return k&&!expandAll&&!EXPANDED.has(n.id)?{...n,name:`${n.name} +${k}`,cluster:true}:n});
+  return {nodes,links:baseLinks.filter(e=>ids.has(e.s)&&ids.has(e.t))};
+}
+function setParent(id,pid){
+  PARENTS[id]=pid||''; const doc={docId:'parents',kind:'parents',map:PARENTS}; saveDoc(doc);
+}
+function toggleExpand(id){ EXPANDED.has(id)?EXPANDED.delete(id):EXPANDED.add(id); store.set('mapExpanded',[...EXPANDED]) }
+function parentCard(n){
+  const p=parentOf(n.id); const kids=childrenOf(n.id);
+  const opts=sortedNodes().filter(m=>m.id!==n.id&&!ancestors(m.id).includes(n.id));
+  return `<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:8px"><span class="label">개념 묶음</span>
+    ${p?`<div style="font-size:13.5px">상위 개념: <button class="chip" data-open="${p}" style="margin-left:4px">${esc(byId[p].name)}</button></div>`:''}
+    ${kids.length?`<div style="font-size:13.5px">하위 개념 ${kids.length}개<div class="chips" style="margin-top:6px">${kids.map(k=>`<button class="chip" data-open="${k.id}" style="font-size:12.5px;padding:3px 10px">${esc(k.name)}</button>`).join('')}</div></div>`:''}
+    <label class="muted" style="font-size:12.5px" for="parentSel">${p?'다른 상위 개념으로 옮기기':'다른 개념의 하위 개념으로 묶기'}</label>
+    <select class="fld" id="parentSel"><option value="">— 큰 개념으로 두기 —</option>${opts.map(m=>`<option value="${m.id}" ${p===m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select>
+    <p class="muted" style="font-size:12px">하위 개념은 전체 지도에서 상위 개념 안에 접혀 보여요.</p></div>`;
+}
 
 function syncLine(){
   if(!window.ITMAP_SYNC) return '';
