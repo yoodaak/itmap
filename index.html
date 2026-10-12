@@ -7,33 +7,77 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Ccircle cx='6' cy='7' r='3.2' fill='%234F46E5'/%3E%3Ccircle cx='20' cy='6' r='2.6' fill='%238B5CF6'/%3E%3Ccircle cx='13' cy='19' r='3.6' fill='%234F46E5'/%3E%3C/svg%3E">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <script>
-/* IT MAP standalone runtime: provides window.claude.use('sample') backed by /api/ai (Gemini). */
+/* IT MAP standalone runtime: login, per-user storage namespace, AI via /api/ai, device sync via /api/sync. */
 (function(){
-  var PW_KEY='itmap.sitePassword', TR='\u0000[[TRUNCATED]]';
+  var AUTH_KEY='itmap.auth';
+  function readAuth(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||'null')}catch(e){return null}}
+  function writeAuth(a){try{if(a)localStorage.setItem(AUTH_KEY,JSON.stringify(a));else localStorage.removeItem(AUTH_KEY)}catch(e){}}
+  var auth=readAuth();
+  if(!auth){try{var old=localStorage.getItem('itmap.sitePassword');if(old){auth={name:'',pw:old};writeAuth(auth)}}catch(e){}}
+  window.ITMAP_HEADERS=function(){var a=auth||{};return {'content-type':'application/json','x-itmap-user':encodeURIComponent(a.name||''),'x-site-password':a.pw||''}};
+  window.ITMAP_NS='itmap.'; window.ITMAP_USER=null;
+  function setUser(u){window.ITMAP_USER=u;window.ITMAP_NS=(u&&!u.owner)?'itmap.u.'+encodeURIComponent(u.name)+'.':'itmap.'}
+  function domReady(){return new Promise(function(r){if(document.body)r();else document.addEventListener('DOMContentLoaded',function(){r()})})}
+  function esc(x){return String(x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  async function showLogin(msg){
+    await domReady();
+    return new Promise(function(resolve){
+      var o=document.createElement('div'); o.id='loginOverlay';
+      o.setAttribute('style','position:fixed;inset:0;z-index:200;background:var(--bg,#F8FAFC);display:flex;align-items:center;justify-content:center;padding:16px');
+      o.innerHTML='<form style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;background:var(--surface,#fff);border:1px solid var(--line,#E2E8F0);border-radius:16px;padding:24px;color:var(--text,#111827)">'
+        +'<div style="font-weight:700;font-size:20px">IT MAP</div>'
+        +'<p style="margin:0;color:var(--muted,#64748B);font-size:14px;line-height:1.6">공부 기록은 사람마다 따로 저장돼요. 받은 이름과 비밀번호로 로그인하세요.</p>'
+        +'<label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">이름<input id="lgName" class="fld" autocomplete="username" value="'+esc(auth&&auth.name||'')+'"></label>'
+        +'<label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">비밀번호<input id="lgPw" class="fld" type="password" autocomplete="current-password"></label>'
+        +'<p id="lgErr" style="margin:0;font-size:13px;color:var(--err-text,#B91C1C)">'+esc(msg||'')+'</p>'
+        +'<button class="btn primary" style="justify-content:center">로그인</button></form>';
+      document.body.appendChild(o);
+      setTimeout(function(){var f=document.getElementById(auth&&auth.name?'lgPw':'lgName');if(f)f.focus()},50);
+      o.querySelector('form').addEventListener('submit',async function(e){
+        e.preventDefault();
+        var name=document.getElementById('lgName').value.trim(), pw=document.getElementById('lgPw').value;
+        if(!pw){document.getElementById('lgErr').textContent='비밀번호를 입력하세요.';return}
+        auth={name:name,pw:pw};
+        var u=await verify().catch(function(){return null});
+        if(!u){document.getElementById('lgErr').textContent='이름 또는 비밀번호가 맞지 않아요.';return}
+        writeAuth(auth); setUser(u); o.remove(); resolve(u);
+      });
+    });
+  }
+  async function verify(){var r=await fetch('/api/auth',{headers:window.ITMAP_HEADERS()});return r.ok?r.json():null}
+  window.ITMAP_AUTH=(async function(){
+    var chk=await fetch('/api/auth?check=1').then(function(r){return r.json()}).catch(function(){return {required:false}});
+    if(!chk.required){setUser({name:'',owner:true,open:true});return window.ITMAP_USER}
+    if(auth&&auth.pw){var u=await verify().catch(function(){return null});if(u){setUser(u);return u}}
+    return showLogin(auth&&auth.pw?'다시 로그인해 주세요.':'');
+  })();
+  window.ITMAP_LOGOUT=function(){writeAuth(null);try{localStorage.removeItem('itmap.sitePassword')}catch(e){}location.reload()};
+  window.ITMAP_AUTH_FAIL=function(){writeAuth(null);location.reload()};
+})();
+
+(function(){
+  var TR='\u0000[[TRUNCATED]]';
   function err(code,message,text){return {code:code,message:message||code,text:text}}
-  async function call(messages,opts,json,retried){
-    var pw=''; try{pw=localStorage.getItem(PW_KEY)||''}catch(e){}
+  async function call(messages,opts,json){
     var res;
     try{
-      res=await fetch('/api/ai',{method:'POST',headers:{'content-type':'application/json','x-site-password':pw},body:JSON.stringify({messages:messages,json:!!json}),signal:opts.signal});
+      res=await fetch('/api/ai',{method:'POST',headers:window.ITMAP_HEADERS(),body:JSON.stringify({messages:messages,json:!!json}),signal:opts.signal});
     }catch(e){ throw err(e&&e.name==='AbortError'?'cancelled':'upstream_error',String(e)) }
-    if(res.status===401){
-      try{localStorage.removeItem(PW_KEY)}catch(e){}
-      var p=window.prompt(retried?'비밀번호가 맞지 않아요. 다시 입력하세요.':'AI 기능을 쓰려면 IT MAP 비밀번호를 입력하세요.');
-      if(p){ try{localStorage.setItem(PW_KEY,p)}catch(e){} return call(messages,opts,json,true) }
-      throw err('not_granted','password required');
-    }
+    if(res.status===401){ if(window.ITMAP_AUTH_FAIL) window.ITMAP_AUTH_FAIL(); throw err('not_granted','login required'); }
     if(res.status===429){ var m=''; try{m=(await res.json()).error}catch(e){} window.ITMAP_LAST_ERR=m||''; throw err('rate_limited',m) }
     if(!res.ok){ var d=''; try{d=(await res.json()).error}catch(e){ d='서버 응답 '+res.status+(res.status===504?' (시간 초과)':'') } console.warn('[IT MAP] /api/ai',res.status,d); window.ITMAP_LAST_ERR=d||('서버 응답 '+res.status); throw err('upstream_error',d) }
     var reader=res.body.getReader(), dec=new TextDecoder(), text='', truncated=false;
     try{
       for(;;){
-        var r=await reader.read(); if(r.done) break;
+        var idleT, r=await Promise.race([reader.read(),new Promise(function(ok){idleT=setTimeout(function(){ok({idle:true})},90000)})]); clearTimeout(idleT);
+        if(r.idle){ try{reader.cancel()}catch(e){} window.ITMAP_LAST_ERR='AI 응답이 90초 동안 멈춰 있어서 중단했어요. 다시 시도해 주세요.'; throw err('upstream_error','idle',text); }
+        if(r.done) break;
         var chunk=dec.decode(r.value,{stream:true}); text+=chunk;
+        if(text.indexOf('\u0000[[STALLED]]')>=0){ window.ITMAP_LAST_ERR='Gemini 응답이 중간에 멈췄어요. 다시 시도해 주세요.'; throw err('upstream_error','stalled',text.split('\u0000[[STALLED]]').join('')) }
         if(text.indexOf(TR)>=0){ truncated=true; text=text.split(TR).join(''); chunk=chunk.split(TR).join('') }
         if(opts.onText&&text) try{opts.onText({text:text,delta:chunk})}catch(e){}
       }
-    }catch(e){ if(!(e&&e.name==='AbortError')) window.ITMAP_LAST_ERR='응답이 중간에 끊겼어요 (시간 초과일 수 있어요)'; throw err(e&&e.name==='AbortError'?'cancelled':'upstream_error',String(e),text) }
+    }catch(e){ if(e&&e.code) throw e; if(!(e&&e.name==='AbortError')) window.ITMAP_LAST_ERR='응답이 중간에 끊겼어요 (시간 초과일 수 있어요)'; throw err(e&&e.name==='AbortError'?'cancelled':'upstream_error',String(e),text) }
     if(!text.trim()){ window.ITMAP_LAST_ERR='AI 응답이 비어 있어요. 잠시 후 다시 시도해 주세요.'; throw err('empty_completion') }
     window.ITMAP_LAST_ERR='';
     return {text:text,truncated:truncated};
@@ -54,19 +98,13 @@
 
 /* IT MAP device sync: mirrors browser records to /api/sync (Upstash Redis) so PC and phone share one record. */
 (function(){
-  function g(k,d){try{var v=localStorage.getItem('itmap.'+k);return v?JSON.parse(v):d}catch(e){return d}}
-  function s(k,v){try{localStorage.setItem('itmap.'+k,JSON.stringify(v))}catch(e){}}
-  var st={enabled:false,state:'checking',last:g('syncLast',null),error:''};
-  var queue=g('syncQueue',{}), meta=g('syncMeta',{}), timer=null, flushing=false;
-  function pw(){try{return localStorage.getItem('itmap.sitePassword')||''}catch(e){return ''}}
-  async function api(method,body,qs,retried){
-    var r=await fetch('/api/sync'+(qs||''),{method:method,headers:{'content-type':'application/json','x-site-password':pw()},body:body?JSON.stringify(body):undefined});
-    if(r.status===401){
-      try{localStorage.removeItem('itmap.sitePassword')}catch(e){}
-      var p=window.prompt(retried?'비밀번호가 맞지 않아요. 다시 입력하세요.':'PC와 휴대폰 기록을 동기화하려면 IT MAP 비밀번호를 입력하세요.');
-      if(p){try{localStorage.setItem('itmap.sitePassword',p)}catch(e){} return api(method,body,qs,true)}
-      throw {code:'auth'};
-    }
+  function g(k,d){try{var v=localStorage.getItem(window.ITMAP_NS+k);return v?JSON.parse(v):d}catch(e){return d}}
+  function s(k,v){try{localStorage.setItem(window.ITMAP_NS+k,JSON.stringify(v))}catch(e){}}
+  var st={enabled:false,state:'checking',last:null,error:''};
+  var queue={}, meta={}, timer=null, flushing=false;
+  async function api(method,body,qs){
+    var r=await fetch('/api/sync'+(qs||''),{method:method,headers:window.ITMAP_HEADERS(),body:body?JSON.stringify(body):undefined});
+    if(r.status===401){ if(window.ITMAP_AUTH_FAIL) window.ITMAP_AUTH_FAIL(); throw {code:'auth'}; }
     if(r.status===501) throw {code:'nostore'};
     if(!r.ok) throw {code:'http',status:r.status};
     return r.json();
@@ -121,6 +159,8 @@
     now:async function(){ if(!st.enabled) return 0; var n=await pull(); await flush(); return n; }
   };
   window.ITMAP_READY=(async function(){
+    await window.ITMAP_AUTH;
+    st.last=g('syncLast',null); queue=g('syncQueue',{}); meta=g('syncMeta',{});
     try{
       var chk=await fetch('/api/sync?check=1').then(function(r){return r.json()}).catch(function(){return {}});
       if(!chk.storage){st.state='off';return}
@@ -700,6 +740,15 @@ table.cmp tbody tr:last-child th,table.cmp tbody tr:last-child td{border-bottom:
 .syncline{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:13px;padding:8px 10px;border-radius:8px;background:var(--surface-2)}
 .syncline.ok{background:var(--ok-soft);color:var(--ok-text)}
 .syncline.error{background:var(--err-soft);color:var(--err-text)}
+.userline{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px}
+.scopebar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.scopebar select{max-width:240px}
+.topicgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px;align-items:stretch;margin-bottom:18px}
+.topicmap{height:380px!important;min-height:0!important}
+.topicbody{display:flex;flex-direction:column;gap:12px}
+.topicbody .md{max-width:none}
+.graph .node.root circle{stroke-width:4}
+@media (max-width:900px){.topicgrid{grid-template-columns:minmax(0,1fr)}}
 /* map */
 .map-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .map-top h1{font-size:22px}
@@ -1189,8 +1238,8 @@ const $ = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
 const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const store = {
-  get(k,d){try{const v=localStorage.getItem('itmap.'+k);return v?JSON.parse(v):d}catch(e){return d}},
-  set(k,v){try{localStorage.setItem('itmap.'+k,JSON.stringify(v))}catch(e){ if(e&&(e.name==='QuotaExceededError'||e.code===22)) setTimeout(()=>toast('브라우저 저장 공간이 가득 찼어요. 백업을 내려받은 뒤 쓰지 않는 강의 노트를 정리해 주세요.'),0) }}
+  get(k,d){try{const v=localStorage.getItem((window.ITMAP_NS||'itmap.')+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem((window.ITMAP_NS||'itmap.')+k,JSON.stringify(v))}catch(e){ if(e&&(e.name==='QuotaExceededError'||e.code===22)) setTimeout(()=>toast('브라우저 저장 공간이 가득 찼어요. 백업을 내려받은 뒤 쓰지 않는 강의 노트를 정리해 주세요.'),0) }}
 };
 let STATUS = store.get('status',null);
 let STATUS_EXAMPLE = false;
@@ -1467,7 +1516,7 @@ const IC = {
 };
 const NAV=[['home','Home','홈'],['explore','Explore','탐색'],['map','Knowledge Map','지도'],['think','Think','사고'],['space','My Space','내 공간']];
 function renderNav(){
-  const active = state.view==='detail'?'explore':(state.view==='scenario'||state.view==='thinkopen')?'think':state.view==='deep'?'explore':state.view;
+  const active = state.view==='detail'?'explore':(state.view==='scenario'||state.view==='thinkopen')?'think':(state.view==='deep'||state.view==='topic')?'explore':state.view;
   $('#sidenav').innerHTML=NAV.map(([v,l])=>`<button class="navitem ${active===v?'on':''}" data-nav="${v}">${IC[v]}${l}</button>`).join('');
   $('#bottomnav').innerHTML=NAV.map(([v,,k])=>`<button class="${active===v?'on':''}" data-nav="${v}">${IC[v]}${k}</button>`).join('');
   const tr=TRAIL.filter(has);
@@ -1488,7 +1537,7 @@ function go(view,params={}){
 function render(){
   renderNav();
   const m=$('#main');
-  const V={space:viewSpace,thinkopen:viewThinkOpen,deep:viewDeep,home:viewHome,explore:viewExplore,detail:viewDetail,map:viewMap,think:viewThink,scenario:viewScenario,me:viewMe,notes:viewNotes}[state.view]||viewHome;
+  const V={topic:viewTopic,space:viewSpace,thinkopen:viewThinkOpen,deep:viewDeep,home:viewHome,explore:viewExplore,detail:viewDetail,map:viewMap,think:viewThink,scenario:viewScenario,me:viewMe,notes:viewNotes}[state.view]||viewHome;
   m.innerHTML = topbar()+V();
   after[state.view]&&after[state.view]();
   clearInterval(genTick);
@@ -1656,7 +1705,7 @@ function viewDetail(){
         <h1>${esc(n.name)}</h1>
         <div class="full">${esc(n.full)}</div>
         <p class="summary">${esc(n.summary)}</p>
-        <div class="actions"><button class="btn primary" data-step="0" data-scrollto="0">기본 학습</button><button class="btn primary" data-deep="${n.id}" style="background:var(--accent);border-color:var(--accent)">깊이 공부하기</button><button class="btn" data-mapfocus="${n.id}">연결 보기</button><button class="btn" data-step="3" data-scrollto="3">사고 문제</button></div>
+        <div class="actions"><button class="btn primary" data-step="0" data-scrollto="0">기본 학습</button><button class="btn primary" data-deep="${n.id}" style="background:var(--accent);border-color:var(--accent)">깊이 공부하기</button><button class="btn" data-mapfocus="${n.id}">연결 보기</button>${hasTopic(n.id)?`<button class="btn" data-topic="${n.id}">🧩 서비스 비교 · 관계</button>`:''}<button class="btn" data-step="3" data-scrollto="3">사고 문제</button></div>
       </header>
       <div class="steps-nav">${STEPS.map((s,i)=>`<button class="${i<step?'done':''} ${i===step?'cur':''} ${i>step?'locked':''}" ${i<=step?`data-scrollto="${i}"`:'disabled'}><b>${i+1}</b>${s[0]}</button>`).join('')}</div>
       ${shown}
@@ -1808,7 +1857,11 @@ function legendHTML(){
 }
 function viewMap(){
   const cats=Object.keys(CATS).filter(c=>NODES.some(n=>n.cats.includes(c)));
-  return `<div class="map-top"><div><span class="eyebrow">Knowledge Map</span><h1>지식 지도 <span class="muted" style="font-size:14px;font-weight:500">개념 ${NODES.length} · 연결 ${EDGES.length}</span></h1></div>
+  const roots=topicRoots(); const sc=state.scope&&has(state.scope)?state.scope:'';
+  const scN=sc?scopeSet(sc,!!state.scopeNb).size:NODES.length;
+  return `<div class="map-top"><div><span class="eyebrow">Knowledge Map</span><h1>${sc?`${esc(byId[sc].name)} 지도`:'지식 지도'} <span class="muted" style="font-size:14px;font-weight:500">개념 ${scN}${sc?` / 전체 ${NODES.length}`:` · 연결 ${EDGES.length}`}</span></h1></div>
+   <div class="scopebar"><label class="sr" for="scopeSel">보기 범위</label><select class="fld" id="scopeSel"><option value="">전체 지도</option>${roots.map(x=>`<option value="${x.n.id}" ${sc===x.n.id?'selected':''}>${esc(x.n.name)}만 보기 (${x.c})</option>`).join('')}</select>
+     ${sc?`<label class="chk" style="align-items:center;font-size:13px"><input type="checkbox" id="scopeNb" ${state.scopeNb?'checked':''}> 바로 연결된 개념도 함께</label><button class="btn sm" data-topic="${sc}">🧩 서비스 비교 · 관계</button>`:''}</div>
    <div class="filters" id="filters"><button class="on" data-cat="">전체</button>${cats.map(c=>`<button data-cat="${c}" class="cat-${c}"><span class="dot catdot"></span>${CATS[c].name}</button>`).join('')}</div></div>
    <div class="mapwrap" id="mapwrap">${legendHTML()}
      <div class="maphint">드래그로 노드 이동 · 스크롤로 확대 · 클릭하면 정보 · 더블클릭하면 이동 · <b>선을 클릭하면 "왜 연결되어 있지?"</b></div>
@@ -1826,7 +1879,7 @@ function nodePanel(id){
    <div class="oneliner" style="font-size:14.5px;padding:12px 14px">${esc(n.one)}</div>
    <div style="font-size:13px;color:var(--muted)">이해하려면 <b style="color:var(--text)">${pre.length}</b> · 이해하면 <b style="color:var(--text)">${nx.length}</b> · 함께 <b style="color:var(--text)">${rel.length}</b>${INSIGHTS.filter(i=>i.node===id).length?` · 내 노트 <b style="color:var(--text)">${INSIGHTS.filter(i=>i.node===id).length}</b>`:''}</div>
    ${pre.length?`<div class="chips">${pre.map(p=>`<button class="chip" data-panelnode="${p.id}">${esc(byId[p.id].name)}</button>`).join('')}</div>`:''}
-   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" data-open="${id}">자세히 학습하기</button><button class="btn sm" data-deep="${id}">깊이 공부하기</button></div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" data-open="${id}">자세히 학습하기</button>${descendants(id).size>=3?`<button class="btn sm" data-scope="${id}">이 주제만 보기</button>`:''}<button class="btn sm" data-deep="${id}">깊이 공부하기</button></div>
    <div class="statuspick">${['known','learning','weak','none'].map(k=>`<button class="${st===k?'on':''}" data-pstatus="${k}" data-id="${id}"><span class="dot s-${k}"></span>${ST_LABEL[k]}</button>`).join('')}</div>
   </div>`;
 }
@@ -1843,7 +1896,8 @@ function edgePanel(e){
 after.map=()=>{
   const wrap=$('#mapwrap'), panel=$('#panel');
   const showNode=id=>{panel.innerHTML=id?nodePanel(id):''};
-  graph=forceGraph(wrap,{nodes:NODES,links:EDGES,nodeClass:d=>d.ai?'ai':'',
+  const sc=state.scope&&has(state.scope)?state.scope:''; const ids=sc?scopeSet(sc,!!state.scopeNb):null;
+  graph=forceGraph(wrap,{nodes:ids?NODES.filter(n=>ids.has(n.id)):NODES,links:ids?EDGES.filter(e=>ids.has(e.s)&&ids.has(e.t)):EDGES,nodeClass:d=>(d.id===sc?'root ':'')+(d.ai?'ai':''),
     onSelect:showNode,onOpen:id=>go('detail',{id}),
     onEdge:e=>{panel.innerHTML=edgePanel(e)}});
   panel.addEventListener('click',ev=>{
@@ -1853,7 +1907,9 @@ after.map=()=>{
   });
   $('#filters').addEventListener('click',ev=>{const b=ev.target.closest('[data-cat]');if(!b)return;$$('#filters button').forEach(x=>x.classList.toggle('on',x===b));graph.filter(b.dataset.cat)});
   $('#zin').onclick=()=>graph.zoomBy(1.3);$('#zout').onclick=()=>graph.zoomBy(1/1.3);$('#zfit').onclick=()=>graph.fit();
-  if(state.focus){setTimeout(()=>{graph.focus(state.focus);showNode(state.focus)},80)}
+  if(state.focus&&(!ids||ids.has(state.focus))){setTimeout(()=>{graph.focus(state.focus);showNode(state.focus)},80)}
+  $('#scopeSel')?.addEventListener('change',e=>go('map',{scope:e.target.value,scopeNb:state.scopeNb}));
+  $('#scopeNb')?.addEventListener('change',e=>go('map',{scope:state.scope,scopeNb:e.target.checked}));
 };
 
 /* ===================== THINK list ===================== */
@@ -1987,7 +2043,7 @@ function viewMe(){
   <div class="me-grid">
     <div class="mapwrap" id="mewrap"><div id="panel"></div></div>
     <div class="stack">
-      ${window.ITMAP_STANDALONE?`<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><span class="label">백업 · 동기화</span>${syncLine()}<p class="muted" style="font-size:13px">공부 기록은 이 브라우저에 저장돼요. 다른 기기로 옮기거나 잃어버리지 않게 가끔 백업해 두세요.</p><div class="aibtns"><button class="btn sm primary" id="bkExport">백업 내려받기</button><label class="btn sm" for="bkImport" style="cursor:pointer">백업 불러오기</label><input type="file" id="bkImport" accept="application/json,.json" hidden></div></div>`:''}
+      ${window.ITMAP_STANDALONE?`<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><span class="label">백업 · 동기화</span>${window.ITMAP_USER&&!window.ITMAP_USER.open?`<div class="userline"><span>👤 <b>${esc(window.ITMAP_USER.name||"나")}</b> 로그인 중</span><button class="linkbtn" id="logout">로그아웃 · 사용자 전환</button></div>`:""}${syncLine()}<p class="muted" style="font-size:13px">공부 기록은 이 브라우저에 저장돼요. 다른 기기로 옮기거나 잃어버리지 않게 가끔 백업해 두세요.</p><div class="aibtns"><button class="btn sm primary" id="bkExport">백업 내려받기</button><label class="btn sm" for="bkImport" style="cursor:pointer">백업 불러오기</label><input type="file" id="bkImport" accept="application/json,.json" hidden></div></div>`:''}
       <button class="card ritem" data-nav="notes" style="padding:14px 16px"><span class="rname">내 노트</span><span class="rsum">${INSIGHTS.length}개 · 들은 내용 기록하기</span></button>
       <div class="counts">${['known','learning','weak','none'].map(k=>`<div><b>${c[k]}</b><span><i class="dot s-${k}"></i>${ST_LABEL[k]}</span></div>`).join('')}</div>
       <div class="card stack" style="padding:16px;gap:10px"><span class="label">연결이 약한 곳</span>
@@ -1999,19 +2055,22 @@ function viewMe(){
     </div>
   </div></div>`;
 }
+const NSX=()=>window.ITMAP_NS||'itmap.';
+function myKeys(){const ns=NSX();const out=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith(ns))continue;if(ns==='itmap.'&&(k.startsWith('itmap.u.')||k==='itmap.auth'||k==='itmap.sitePassword'))continue;out.push(k)}return out}
 after.me=()=>{
+  $('#logout')?.addEventListener('click',()=>window.ITMAP_LOGOUT&&window.ITMAP_LOGOUT());
   $('#bkExport')?.addEventListener('click',()=>{
-    const data={}; for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i); if(k&&k.startsWith('itmap.')&&k!=='itmap.sitePassword') data[k]=localStorage.getItem(k)}
-    const blob=new Blob([JSON.stringify({app:'itmap',version:1,exported:new Date().toISOString(),data})],{type:'application/json'});
+    const data={}; myKeys().forEach(k=>{data[k.slice(NSX().length)]=localStorage.getItem(k)});
+    const blob=new Blob([JSON.stringify({app:'itmap',version:2,user:window.ITMAP_USER&&window.ITMAP_USER.name||'',exported:new Date().toISOString(),data})],{type:'application/json'});
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob); const d=new Date(); a.download=`itmap-backup-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
   });
   $('#bkImport')?.addEventListener('change',async e=>{
     const f=e.target.files&&e.target.files[0]; if(!f) return;
     try{ const j=JSON.parse(await f.text()); if(!j||j.app!=='itmap'||!j.data) throw 0;
       if(!window.confirm('백업을 불러오면 지금 이 브라우저의 기록이 백업 내용으로 바뀝니다. 계속할까요?')) return;
-      Object.keys(localStorage).filter(k=>k.startsWith('itmap.')&&k!=='itmap.sitePassword').forEach(k=>localStorage.removeItem(k));
-      Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('itmap.')) localStorage.setItem(k,v) });
-      localStorage.setItem('itmap.syncForcePush','true');
+      myKeys().forEach(k=>localStorage.removeItem(k));
+      Object.entries(j.data).forEach(([k,v])=>{ let sk=k; if(j.version===1||!j.version){ if(!k.startsWith('itmap.')||k.startsWith('itmap.u.')||k==='itmap.auth'||k==='itmap.sitePassword') return; sk=k.slice(6) } if(/^(auth|sitePassword|syncMeta|syncSince|syncQueue|syncInit|syncLast)$/.test(sk)) return; localStorage.setItem(NSX()+sk,v) });
+      store.set('syncForcePush',true); store.set('syncInit',true);
       location.reload();
     }catch(err){ toast('IT MAP 백업 파일이 아니거나 읽을 수 없어요.') }
   });
@@ -2309,7 +2368,7 @@ function dgSeq(buf){const {title,rest}=dgHead(buf);let parts=[];const msgs=[];
   const X=nm=>PAD+COL*parts.indexOf(nm)+COL/2;
   const tr=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
   let s=`<svg class="seqsvg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;min-width:${Math.round(W*0.85)}px;height:auto" role="img" aria-label="${esc(title||'순서도')}"><defs><marker id="sqa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10z" class="sqah"/></marker></defs>`;
-  parts.forEach(pt=>{const x=X(pt);s+=`<line class="sql" x1="${x}" y1="${top-10}" x2="${x}" y2="${H-6}"/><rect class="sqp" x="${x-COL/2+10}" y="6" width="${COL-20}" height="32" rx="9"/><text class="sqpt" x="${x}" y="27" text-anchor="middle">${esc(tr(pt,13))}</text>`});
+  parts.forEach(pt=>{const x=X(pt);s+=`<line class="sql" x1="${x}" y1="${top-10}" x2="${x}" y2="${H-6}"/><rect class="sqp" x="${x-COL/2+10}" y="6" width="${COL-20}" height="32" rx="9"/><text class="sqpt" x="${x}" y="27" text-anchor="middle" ${pt.length>14?`textLength="${COL-28}" lengthAdjust="spacingAndGlyphs"`:''}>${esc(tr(pt,17))}</text>`});
   msgs.forEach((m,k)=>{if(!parts.includes(m.a)||!parts.includes(m.b))return;const y=top+ROW*k+30,x1=X(m.a),x2=X(m.b);
     if(x1===x2){s+=`<path class="sqm${m.dash?' dash':''}" d="M${x1},${y-10} h36 v18 h-32" marker-end="url(#sqa)"/><text class="sqt" x="${x1+44}" y="${y+4}">${esc(tr(m.t,9))}</text>`}
     else{const span=Math.abs(x2-x1);s+=`<line class="sqm${m.dash?' dash':''}" x1="${x1}" y1="${y}" x2="${x2+(x2>x1?-3:3)}" y2="${y}" marker-end="url(#sqa)"/><text class="sqt" x="${(x1+x2)/2}" y="${y-8}" text-anchor="middle">${esc(tr(m.t,Math.max(8,Math.floor(span/12))))}</text><circle class="sqc" cx="${x1}" cy="${y}" r="9"/><text class="sqn" x="${x1}" y="${y+3.5}" text-anchor="middle">${k+1}</text>`}});
@@ -2611,7 +2670,7 @@ function deepSide(n){
 }
 function componentChips(n,c){
   if(!c.components||!c.components.length) return '';
-  return `<div class="card" style="padding:14px"><span class="label">핵심 구성 요소</span><p class="muted" style="font-size:12px;margin:4px 0 10px">지도에 없는 것은 + 를 눌러 ${esc(n.name)} 아래에 추가할 수 있어요.</p><div class="stack" style="gap:8px">${c.components.map(x=>{
+  return `<div class="card" style="padding:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span class="label">핵심 구성 요소</span><button class="linkbtn" data-topic="${n.id}" style="color:var(--primary)">비교 · 관계 보기 →</button></div><p class="muted" style="font-size:12px;margin:4px 0 10px">지도에 없는 것은 + 를 눌러 ${esc(n.name)} 아래에 추가할 수 있어요.</p><div class="stack" style="gap:8px">${c.components.map(x=>{
     const ex=findByName(x.name); const busy=GEN&&GEN.busy&&GEN.q===x.name;
     return `<div class="comp">${ex?`<button class="nlink" data-open="${ex.id}">${esc(x.name)}</button>`:`<span style="font-weight:600">${esc(x.name)}</span>`}${ex?'<span class="tag" style="font-size:11px">지도에 있음</span>':busy?'<span class="tag ai" style="font-size:11px">추가 중…</span>':CLOUD.sample?`<button class="why-btn" data-gen="${esc(x.name)}" data-parent="${n.id}">+ 지도에 추가</button>`:''}<div class="muted" style="font-size:12.5px;flex-basis:100%">${esc(x.role)}</div></div>`}).join('')}</div></div>`;
 }
@@ -2719,6 +2778,7 @@ function loadExtra(k,d){
   else if(d.kind==='sg'&&d.node) SUGG[d.node]={...d,docId:k};
   else if(d.kind==='rv'&&!REVIEWS.some(r=>r.docId===k)) REVIEWS.push({...d,docId:k});
   else if(d.kind==='th'&&d.id) THINKS[d.id]={...d,docId:k};
+  else if(d.kind==='topic'&&d.node) TOPIC[d.node]={...d,docId:k};
 }
 
 /* ---------- level ---------- */
@@ -3167,7 +3227,7 @@ function viewHome(){
   const lastEdge=[...EDGES].reverse().find(e=>e.user); const tp=todayPreset();
   const lv=cont?levelOf(cont.id):0;
   return `<div class="wrap home2">
-   <h1 class="greet">${greet} 👋</h1>
+   <h1 class="greet">${greet}${window.ITMAP_USER&&window.ITMAP_USER.name&&window.ITMAP_USER.name!=='나'?`, ${esc(window.ITMAP_USER.name)}님`:''} 👋</h1>
    <div class="hgrid">
     <article class="card hcont">${cont?`<span class="label">오늘 이어서 공부하기</span><h2>${esc(cont.name)}</h2><div class="lvmeter" aria-label="이해도 Lv.${lv}">${[1,2,3,4,5].map(i=>`<i class="${i<=lv?'on':''}"></i>`).join('')}<span>이해도 Lv.${lv}</span></div><p class="muted">${esc(cont.summary)}</p>
       <div class="aibtns"><button class="btn primary" ${COURSES[cont.id]?`data-deep="${cont.id}"`:`data-open="${cont.id}"`}>계속 학습하기 →</button>${UND[cont.id]?'':`<button class="btn" data-und="${cont.id}">내 말로 설명하기</button>`}</div>`
@@ -3218,6 +3278,94 @@ after.thinkopen=()=>{
   });
 };
 
+/* ===================== TOPIC SCOPE: focused map + service comparison/collaboration ===================== */
+const TOPIC={};
+function descendants(root){
+  const out=new Set([root]); let grew=true;
+  while(grew){ grew=false;
+    EDGES.forEach(e=>{ if(e.type==='part_of'&&out.has(e.t)&&!out.has(e.s)&&has(e.s)){out.add(e.s);grew=true} });
+    NODES.forEach(n=>{ if(n.parent&&out.has(n.parent)&&!out.has(n.id)){out.add(n.id);grew=true} });
+  }
+  return out;
+}
+function topicRoots(){ return NODES.map(n=>({n,c:descendants(n.id).size-1})).filter(x=>x.c>=2).sort((a,b)=>b.c-a.c||a.n.name.localeCompare(b.n.name)) }
+function scopeSet(root,withNb){
+  const s=descendants(root);
+  if(withNb){ const base=[...s]; EDGES.forEach(e=>{ if(base.includes(e.s)&&has(e.t)) s.add(e.t); if(base.includes(e.t)&&has(e.s)) s.add(e.s); }); }
+  return s;
+}
+function topicMembers(id){ const d=descendants(id); d.delete(id); return [...d].filter(has).map(x=>byId[x]) }
+function topicNames(id){
+  const names=topicMembers(id).map(m=>m.name);
+  (COURSES[id]&&COURSES[id].components||[]).forEach(c=>{ if(!names.some(x=>x.toLowerCase()===c.name.toLowerCase())) names.push(c.name) });
+  return names;
+}
+const hasTopic=id=>topicMembers(id).length>=2||((COURSES[id]&&COURSES[id].components||[]).length>=2);
+
+function viewTopic(){
+  const n=byId[state.id]; if(!n) return viewHome();
+  const mem=topicMembers(n.id); const names=topicNames(n.id); const t=TOPIC[n.id];
+  const busy=AIB&&AIB.key==='topic:'+n.id;
+  const missing=(COURSES[n.id]&&COURSES[n.id].components||[]).filter(c=>!findByName(c.name));
+  return `<div class="wrap">
+   <div class="game-head"><button class="btn ghost sm" data-open="${n.id}" style="align-self:flex-start;margin-left:-10px">← ${esc(n.name)} 개념 페이지</button><span class="eyebrow" style="color:var(--accent)">주제 한눈에 보기</span><h1>${esc(n.name)} 서비스 비교 · 관계</h1><p class="muted">${esc(n.name)}을(를) 이루는 서비스들만 모아서, 서로 무엇이 다르고 어떻게 협업하는지 봅니다.</p></div>
+   <div class="topicgrid">
+    <section class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px">
+      <div class="section-title" style="margin:0"><span class="label">구성 요소 ${mem.length}</span><button class="btn ghost sm" data-scope="${n.id}">이 주제 지도만 크게 보기</button></div>
+      <div class="chips">${mem.map(m=>nodeChip(m.id)).join('')||'<span class="muted" style="font-size:13.5px">아직 지도에 추가한 구성 요소가 없어요.</span>'}</div>
+      ${missing.length&&CLOUD.sample?`<div><span class="label">지도에 없는 구성 요소</span><div class="chips" style="margin-top:6px">${missing.map(c=>{const b=GEN&&GEN.busy&&GEN.q===c.name;return `<button class="chip" data-gen="${esc(c.name)}" data-parent="${n.id}" ${b?'disabled':''}>${b?'추가 중… ':'+ '}${esc(c.name)}</button>`}).join('')}</div></div>`:''}
+    </section>
+    <div class="mapwrap topicmap" id="topicwrap"><div id="panel"></div></div>
+   </div>
+   <section class="card topicbody">
+    <div class="section-title"><h2 style="font-size:19px">🧩 서비스 비교와 협업 흐름</h2>${t&&!busy&&CLOUD.sample?'<button class="btn ghost sm" id="topicRegen">다시 만들기</button>':''}</div>
+    ${busy?`${aiBusy('서비스별 역할·DB·통신 방식을 비교하고 협업 흐름을 그리고 있어요')}<div class="md lesson" id="topicBody">${md(AIB.text||'',n.id)}</div>`
+      :t?`<p class="muted" style="font-size:12.5px">${fmtDate(t.created)} 만듦 · 대상: ${esc((t.members||[]).join(', '))}</p><div class="md lesson">${md(t.md,n.id)}</div>`
+      :names.length>=2&&CLOUD.sample?`<p style="font-size:14.5px">${esc(names.slice(0,7).join(', '))}을(를) 나란히 놓고 <b>역할 · 내부 구성요소 · 자기 DB에 저장하는 것 · 통신 방식 · 장애 증상</b>을 비교하고, VM 생성처럼 여러 서비스가 함께 움직이는 흐름을 순서도로 보여 줘요.</p><div><button class="btn primary" id="topicGen" ${AIB?'disabled':''}>AI로 비교표 · 협업 흐름 만들기</button></div>`
+      :`<p class="muted" style="font-size:14px">${CLOUD.sample?'비교하려면 구성 요소가 2개 이상 필요해요. 위에서 구성 요소를 지도에 추가하거나, 깊이 공부하기에서 커리큘럼을 먼저 만들어 주세요.':'AI 기능을 쓸 수 있을 때 비교표를 만들 수 있어요.'}</p>`}
+   </section></div>`;
+}
+async function genTopic(n,signal){
+  const names=topicNames(n.id).slice(0,7);
+  const prompt=`당신은 "${n.name}"을(를) 가르치는 시니어 엔지니어입니다. ${n.name}의 주요 구성 서비스들을 서로 비교하고 어떻게 협업하는지 보여 주는 학습 자료를 Markdown으로 쓰세요.
+대상 서비스: ${names.join(', ')}
+${learnerContext(n)}
+${COMPLETENESS}
+구조를 지키세요:
+## 한눈에 비교
+compare 그림 1개. 첫 줄은 "기준 | ${names.join(' | ')}". 기준 행: 한 줄 역할 / 핵심 내부 구성요소 / 자기 DB에 저장하는 것 / 다른 서비스와 대화하는 방식 / 장애 나면 보이는 증상. 칸의 글은 짧게.
+## 서로 어떻게 연결되나
+layers 또는 hub 그림 1개 + 2~3문장 (누가 누구를 호출하는지, 모두가 공통으로 기대는 것: 인증·메시지 큐·DB 등)
+## 협업 흐름: (대표 작업 1, 예: VM 생성)
+seq 그림 1개 — 참여자는 서비스와 그 안의 핵심 내부 구성요소, DB·메시지 큐까지. 그 아래 단계 요약 목록.
+## 협업 흐름: (대표 작업 2)
+## 협업 흐름: (대표 작업 3)
+## 헷갈리기 쉬운 차이
+목록 3~5개 (예: "Glance DB에는 이미지 파일이 아니라 메타데이터가 저장된다")
+## 스스로 확인
+"Q: …" 다음 줄 "A: …" 형식으로 3개
+다른 개념 이름은 처음 나올 때 [[이름]]으로. 한국어.
+
+${DIAGRAM_GUIDE}`;
+  const {text}=await CLOUD.sample(prompt,{signal,modelTier:'default',onText:({text})=>{if(AIB)AIB.text=text;const el=$('#topicBody');if(el)el.innerHTML=md(text,n.id)}});
+  const doc={docId:'tp-'+n.id,kind:'topic',node:n.id,md:text,members:names,created:nowISO()};
+  TOPIC[n.id]=doc; saveDoc(doc);
+}
+after.topic=()=>{
+  const n=byId[state.id]; if(!n) return;
+  $('#topicGen')?.addEventListener('click',()=>runAI('topic:'+n.id,s=>genTopic(n,s),'비교표와 협업 흐름을 만들었어요.'));
+  const rg=$('#topicRegen'); if(rg) rg.addEventListener('click',()=>{ if(rg.dataset.armed) runAI('topic:'+n.id,s=>genTopic(n,s)); else {rg.dataset.armed='1';rg.textContent='한 번 더 누르면 새로 만듭니다'} });
+  const wrap=$('#topicwrap'); const ids=scopeSet(n.id,false);
+  if(wrap&&ids.size>1){ const panel=$('#panel');
+    graph=forceGraph(wrap,{nodes:NODES.filter(x=>ids.has(x.id)),links:EDGES.filter(e=>ids.has(e.s)&&ids.has(e.t)),nodeClass:d=>(d.id===n.id?'root ':'')+(d.ai?'ai':''),onSelect:id=>{panel.innerHTML=id?nodePanel(id):''},onOpen:id=>go('detail',{id}),onEdge:e=>{panel.innerHTML=edgePanel(e)}});
+    panel.addEventListener('click',ev=>{if(ev.target.closest('[data-close]')){panel.innerHTML='';graph.select(null)}});
+  } else if(wrap) wrap.innerHTML='<div class="emptymap"><p class="muted" style="font-size:13.5px">구성 요소를 지도에 추가하면 여기에 이 주제만의 지도가 그려져요.</p></div>';
+};
+document.addEventListener('click',e=>{
+  const sc=e.target.closest('[data-scope]'); if(sc){go('map',{scope:sc.dataset.scope});return}
+  const tp=e.target.closest('[data-topic]'); if(tp){go('topic',{id:tp.dataset.topic});return}
+});
+
 function syncLine(){
   if(!window.ITMAP_SYNC) return '';
   const s=window.ITMAP_SYNC.status();
@@ -3232,12 +3380,20 @@ document.addEventListener('click',async e=>{
 });
 window.ITMAP_ON_REMOTE=n=>toast(`다른 기기에서 바뀐 내용 ${n}개가 있어요.`,'<button class="btn sm primary" onclick="location.reload()">새로고침</button>');
 async function boot(){
+  if(window.ITMAP_AUTH){
+    $('#main').innerHTML='<div class="wrap"><p class="muted" style="padding:48px 0">불러오는 중…</p></div>';
+    await window.ITMAP_AUTH;
+  }
   if(window.ITMAP_READY){
     $('#main').innerHTML='<div class="wrap"><p class="muted" style="padding:48px 0">기록을 동기화하는 중…</p></div>';
     await Promise.race([window.ITMAP_READY,new Promise(r=>setTimeout(r,6000))]);
+  }
+  if(window.ITMAP_AUTH||window.ITMAP_READY){
     CUSTOM=store.get('custom',{});
-    const s=store.get('status',null); if(s){STATUS=s;STATUS_EXAMPLE=store.get('statusExample',false)}
-    NOTES=store.get('notes',{});
+    const s=store.get('status',null);
+    if(s){STATUS=s;STATUS_EXAMPLE=store.get('statusExample',false)}
+    else{STATUS={linux:'known',process:'known',memory:'learning',network:'known',http:'learning',docker:'learning',kubernetes:'learning',git:'known',dns:'weak'};STATUS_EXAMPLE=true}
+    NOTES=store.get('notes',{}); TRAIL=store.get('trail',[]); READMODE=store.get('readMode','card');
   }
   loadCustom(CUSTOM); go('home'); initCloud();
 }

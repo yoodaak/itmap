@@ -2,9 +2,9 @@
 // Connect a store in Vercel → Storage → Upstash Redis (Marketplace). It injects KV_REST_API_URL / KV_REST_API_TOKEN
 // (or UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN); both naming styles are detected.
 // Protected by the same SITE_PASSWORD as /api/ai.
+import { whoami, dataKey } from './_auth.js';
 export const config = { maxDuration: 30 };
 
-const KEY = 'itmap:docs';
 const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 
@@ -26,14 +26,15 @@ async function redis(cfg, cmd) {
   if (!r.ok || j.error) throw new Error(j.error || 'redis ' + r.status);
   return j.result;
 }
-const authed = (request) => !process.env.SITE_PASSWORD || request.headers.get('x-site-password') === process.env.SITE_PASSWORD;
 
 export async function GET(request) {
   const url = new URL(request.url);
   const cfg = store();
   if (url.searchParams.get('check') === '1') return json({ storage: !!cfg });
-  if (!authed(request)) return json({ error: 'unauthorized' }, 401);
+  const me = whoami(request);
+  if (!me) return json({ error: 'unauthorized' }, 401);
   if (!cfg) return json({ error: '저장소(Upstash Redis)가 연결되지 않았어요.' }, 501);
+  const KEY = dataKey(me);
   try {
     const since = Number(url.searchParams.get('since')) || 0;
     const flat = (await redis(cfg, ['HGETALL', KEY])) || [];
@@ -46,7 +47,9 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  if (!authed(request)) return json({ error: 'unauthorized' }, 401);
+  const me = whoami(request);
+  if (!me) return json({ error: 'unauthorized' }, 401);
+  const KEY = dataKey(me);
   const cfg = store();
   if (!cfg) return json({ error: '저장소(Upstash Redis)가 연결되지 않았어요.' }, 501);
   let body;

@@ -3,6 +3,7 @@
 //   GEMINI_API_KEY  (required)  key from https://aistudio.google.com/apikey
 //   SITE_PASSWORD   (optional)  if set, the site asks for this password before using AI
 //   GEMINI_MODEL    (optional)  defaults to gemini-flash-latest
+import { whoami, authRequired } from './_auth.js';
 export const config = { maxDuration: 300 };
 
 const TR = '\u0000[[TRUNCATED]]';
@@ -16,12 +17,32 @@ const MODELS = () => [...new Set([process.env.GEMINI_MODEL || 'gemini-flash-late
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function callGemini(method, body, signal) {
   let last = null;
+  const started = Date.now();
   for (const model of MODELS()) {
-    for (let attempt = 0; attempt < 2; attempt++) {
+    let noThinking = !/pro/.test(model); // turning off "thinking" makes flash models answer much faster
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (Date.now() - started > 100000) return { error: last || { status: 504, detail: '{"error":{"message":"timeout"}}', model } };
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:${method}`;
-      const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY }, body: JSON.stringify(body), signal });
+      const gc = { ...(body.generationConfig || {}) };
+      if (noThinking) gc.thinkingConfig = { thinkingBudget: 0 };
+      const ctl = new AbortController();
+      const onAbort = () => ctl.abort();
+      if (signal) signal.addEventListener('abort', onAbort);
+      const timer = setTimeout(() => ctl.abort(), 45000); // no response headers within 45s → try again / next model
+      let res;
+      try {
+        res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY }, body: JSON.stringify({ ...body, generationConfig: gc }), signal: ctl.signal });
+      } catch (e) {
+        clearTimeout(timer);
+        if (signal && signal.aborted) throw e;
+        last = { status: 504, detail: '{"error":{"message":"Gemini가 45초 동안 응답하지 않았어요"}}', model };
+        console.warn('Gemini timeout', model);
+        break; // next model
+      }
+      clearTimeout(timer);
       if (res.ok) return { res, model };
       const detail = await res.text();
+      if (res.status === 400 && noThinking && /thinking/i.test(detail)) { noThinking = false; attempt--; continue; }
       last = { status: res.status, detail, model };
       console.warn('Gemini', model, res.status, detail.slice(0, 200));
       if (res.status === 503 || res.status === 500) { if (attempt === 0) { await sleep(1500); continue; } break; }
@@ -39,6 +60,7 @@ function explain(status, detail) {
   if (t.includes('api_key_invalid') || t.includes('api key not valid')) return 'Gemini API 키가 올바르지 않아요. Vercel의 GEMINI_API_KEY 값을 다시 복사해 넣고 Redeploy 하세요.';
   if (status === 404 || t.includes('not found') || t.includes('is not supported')) return `모델을 찾을 수 없어요 (${process.env.GEMINI_MODEL || 'gemini-flash-latest'}). Vercel에 GEMINI_MODEL=gemini-2.5-flash 를 추가하고 Redeploy 해 보세요.`;
   if (status === 429 || t.includes('quota') || t.includes('resource_exhausted')) return 'Gemini 무료 사용량 한도에 걸렸어요. 1분쯤 뒤에 다시 시도하거나, 하루 한도라면 내일 다시 시도하세요.';
+  if (status === 504 || t.includes('timeout')) return 'Gemini가 너무 오래 응답하지 않았어요. 잠시 뒤에 다시 시도해 주세요.';
   if (status === 503 || status === 500 || t.includes('high demand') || t.includes('overloaded')) return 'Gemini 서버가 지금 붐벼요 (여러 모델로 다시 시도했지만 모두 바빴어요). 잠시 뒤에 다시 눌러 주세요.';
   if (status === 403 || t.includes('permission')) return 'Gemini API 사용 권한이 없어요. Google AI Studio에서 키를 새로 만들어 넣어 보세요.';
   if (status === 400 && t.includes('location')) return '이 지역에서는 Gemini API를 쓸 수 없다고 나와요.';
@@ -47,9 +69,10 @@ function explain(status, detail) {
 
 export async function GET(request) {
   const url = new URL(request.url);
-  const info = { ok: true, hasKey: !!process.env.GEMINI_API_KEY, passwordProtected: !!process.env.SITE_PASSWORD, model: process.env.GEMINI_MODEL || 'gemini-flash-latest' };
+  const info = { ok: true, hasKey: !!process.env.GEMINI_API_KEY, passwordProtected: authRequired(), model: process.env.GEMINI_MODEL || 'gemini-flash-latest' };
   if (url.searchParams.get('test') !== '1') return json(info);
-  if (process.env.SITE_PASSWORD && url.searchParams.get('pw') !== process.env.SITE_PASSWORD) return json({ ...info, test: '비밀번호(pw)가 맞지 않아요. 주소 끝에 &pw=내비밀번호 를 붙여 주세요.' }, 401);
+  const tu = url.searchParams.get('user') || '';
+  if (!whoami(new Request(request.url, { headers: { 'x-site-password': url.searchParams.get('pw') || '', 'x-itmap-user': encodeURIComponent(tu) } }))) return json({ ...info, test: '비밀번호(pw)가 맞지 않아요. 주소 끝에 &pw=내비밀번호 를 붙여 주세요.' }, 401);
   if (!info.hasKey) return json({ ...info, test: 'GEMINI_API_KEY 가 없어요.' }, 500);
   const { res: r, model, error } = await callGemini('generateContent', { contents: [{ role: 'user', parts: [{ text: '"OK" 한 단어로만 답하세요.' }] }], generationConfig: { maxOutputTokens: 256 } });
   if (error) return json({ ...info, test: '실패', status: error.status, triedModels: MODELS(), reason: explain(error.status, error.detail), raw: error.detail.slice(0, 400) }, 200);
@@ -61,8 +84,7 @@ export async function GET(request) {
 export async function POST(request) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return json({ error: 'GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.' }, 500);
-  const pw = process.env.SITE_PASSWORD;
-  if (pw && request.headers.get('x-site-password') !== pw) return json({ error: 'unauthorized' }, 401);
+  if (!whoami(request)) return json({ error: 'unauthorized' }, 401);
 
   let body;
   try { body = await request.json(); } catch { return json({ error: 'bad request' }, 400); }
@@ -91,7 +113,11 @@ export async function POST(request) {
   let buf = '';
   const stream = new ReadableStream({
     async pull(ctrl) {
-      const { done, value } = await reader.read();
+      let idle;
+      const r = await Promise.race([reader.read(), new Promise((res) => { idle = setTimeout(() => res({ idle: true }), 60000); })]);
+      clearTimeout(idle);
+      if (r.idle) { ctrl.enqueue(enc.encode('\u0000[[STALLED]]')); ctrl.close(); reader.cancel().catch(() => {}); return; }
+      const { done, value } = r;
       if (done) { ctrl.close(); return; }
       buf += dec.decode(value, { stream: true });
       let i;
