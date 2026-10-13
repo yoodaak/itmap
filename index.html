@@ -27,8 +27,9 @@
       o.innerHTML='<form style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;background:var(--surface,#fff);border:1px solid var(--line,#E2E8F0);border-radius:16px;padding:24px;color:var(--text,#111827)">'
         +'<div style="font-weight:700;font-size:20px">IT MAP</div>'
         +'<p style="margin:0;color:var(--muted,#64748B);font-size:14px;line-height:1.6">공부 기록은 사람마다 따로 저장돼요. 받은 이름과 비밀번호로 로그인하세요.</p>'
-        +'<label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">이름<input id="lgName" class="fld" autocomplete="username" value="'+esc(auth&&auth.name||'')+'"></label>'
+        +'<label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">이름<input id="lgName" placeholder="받은 이름 (주인은 비워 두기)" class="fld" autocomplete="username" value="'+esc(auth&&auth.name||'')+'"></label>'
         +'<label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">비밀번호<input id="lgPw" class="fld" type="password" autocomplete="current-password"></label>'
+        +'<p style="margin:0;font-size:12.5px;color:var(--muted,#64748B);line-height:1.6;background:var(--surface-2,#F1F5F9);border-radius:8px;padding:8px 10px">사이트 주인은 <b>이름 칸을 비우고</b>, Vercel에 정한 관리자 비밀번호(SITE_PASSWORD)를 입력하세요.</p>'
         +'<p id="lgErr" style="margin:0;font-size:13px;color:var(--err-text,#B91C1C)">'+esc(msg||'')+'</p>'
         +'<button class="btn primary" style="justify-content:center">로그인</button></form>';
       document.body.appendChild(o);
@@ -266,7 +267,7 @@ main{min-width:0;padding:32px 40px 72px}
   .sidebar{display:none}
   main{padding:16px 16px calc(96px + env(safe-area-inset-bottom,0px))}
   .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-  .bottomnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+  .bottomnav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
   .bottomnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted);padding:4px 0}
   .bottomnav button svg{width:20px;height:20px}
   .bottomnav button.on{color:var(--primary)}
@@ -755,6 +756,57 @@ table.cmp tbody tr:last-child th,table.cmp tbody tr:last-child td{border-bottom:
 .crumbs .cur{color:var(--text);font-weight:600}
 .graph .node.cluster circle{stroke-width:5;fill:var(--accent-soft)}
 .urow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;padding:6px 0;border-bottom:1px dashed var(--line)}
+
+/* inquiry */
+.iqnew{display:flex;flex-direction:column;gap:12px}
+.iqlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:12px}
+.iqcard{text-align:left;display:flex;flex-direction:column;gap:8px;cursor:pointer;font:inherit;color:inherit}
+.iqcard:hover{border-color:var(--primary)}
+.iqcard b{font-size:15.5px;line-height:1.45}
+.iqstages{display:flex;align-items:center;gap:5px}
+.iqstages i{width:22px;height:5px;border-radius:3px;background:var(--line)}
+.iqstages i.on{background:var(--primary)}
+.iqstages small{margin-left:6px;color:var(--muted);font-size:12px}
+.iqnow{font-size:13px;line-height:1.5}
+.iqtitle{font-size:clamp(20px,3.4vw,28px);line-height:1.35}
+.iqtabs{display:flex;gap:6px;overflow-x:auto;margin:16px 0 18px;padding-bottom:4px;scrollbar-width:none}
+.iqtabs::-webkit-scrollbar{display:none}
+.iqtabs button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:8px 14px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.iqtabs button.done{color:var(--text)}
+.iqtabs button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.iqsteps{list-style:none;counter-reset:iq;display:flex;flex-direction:column;gap:10px;padding:0;margin:0}
+.iqsteps li{counter-increment:iq;display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.iqsteps li::before{content:counter(iq);flex:0 0 26px;height:26px;border-radius:50%;background:var(--primary-soft,rgba(79,70,229,.12));color:var(--primary);display:grid;place-items:center;font-weight:700;font-size:13px}
+.iqsteps li>div{flex:1;min-width:0}
+.iqsteps li p{font-size:13px;margin-top:3px}
+.iqdig{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:start}
+.iqtree{position:sticky;top:16px;display:flex;flex-direction:column;gap:8px;padding:14px}
+.iqnodes{display:flex;flex-direction:column;gap:2px}
+.iqnode{display:flex;gap:8px;align-items:flex-start;text-align:left;border:0;background:none;border-radius:8px;padding:7px 10px;font:inherit;font-size:13.5px;line-height:1.4;color:var(--text);cursor:pointer}
+.iqnode:hover{background:var(--bg)}
+.iqnode.on{background:var(--primary);color:#fff}
+.iqdot{flex:0 0 8px;height:8px;border-radius:50%;border:1.5px solid currentColor;margin-top:5px;opacity:.6}
+.iqdot.done{background:currentColor;opacity:1}
+.iqh{font-size:20px;line-height:1.4}
+.iqlens{display:flex;flex-wrap:wrap;gap:6px}
+.iqlens span{font-size:12px;font-weight:600;color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.iqbodywrap{position:relative}
+.iqselbtn[hidden]{display:none!important}
+.iqselbtn{position:absolute;z-index:5;box-shadow:0 6px 18px rgba(15,23,42,.18);white-space:nowrap}
+.iqconn{display:flex;flex-direction:column;gap:10px}
+.iqconn.saved{border-color:var(--primary)}
+.iqconnhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.iqrefl{display:flex;flex-direction:column;gap:14px}
+.iqbefore{font-size:15px;line-height:1.65;border-left:3px solid var(--line);padding-left:12px;white-space:pre-wrap}
+.hiq{display:flex;flex-direction:column;gap:10px;margin:4px 0 16px}
+.hiqlist{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.hiqlist .linkbtn{text-align:left;font-size:13.5px}
+@media (max-width:760px){
+  .iqdig{grid-template-columns:1fr}
+  .iqtree{position:static}
+  .iqsteps li{flex-wrap:wrap}
+  .iqsteps li .btn{margin-left:38px}
+}
 /* map */
 .map-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .map-top h1{font-size:22px}
@@ -1512,6 +1564,7 @@ function search(qRaw){
 
 /* ===================== icons & nav ===================== */
 const IC = {
+  inquiry:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.2 9a2.9 2.9 0 0 1 5.6 1c0 2-2.8 2.5-2.8 4.2"/><path d="M12 17.6v.1"/><circle cx="12" cy="12" r="9"/></svg>',
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
   explore:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
   map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="7" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7.3 7.2 10.6 16M17.6 9.1l-4.3 6.9M7.5 6.1l9 .7"/></svg>',
@@ -1520,9 +1573,9 @@ const IC = {
   space:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><circle cx="17.25" cy="17.25" r="3.75"/></svg>',
   me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
 };
-const NAV=[['home','Home','홈'],['explore','Explore','탐색'],['map','Knowledge Map','지도'],['think','Think','사고'],['space','My Space','내 공간']];
+const NAV=[['home','Home','홈'],['explore','Explore','탐색'],['inquiry','Inquiry','탐구'],['map','Knowledge Map','지도'],['think','Think','사고'],['space','My Space','내 공간']];
 function renderNav(){
-  const active = state.view==='detail'?'explore':(state.view==='scenario'||state.view==='thinkopen')?'think':(state.view==='deep'||state.view==='topic')?'explore':state.view;
+  const active = state.view==='detail'?'explore':(state.view==='scenario'||state.view==='thinkopen')?'think':(state.view==='deep'||state.view==='topic')?'explore':state.view==='iq'?'inquiry':state.view;
   $('#sidenav').innerHTML=NAV.map(([v,l])=>`<button class="navitem ${active===v?'on':''}" data-nav="${v}">${IC[v]}${l}</button>`).join('');
   $('#bottomnav').innerHTML=NAV.map(([v,,k])=>`<button class="${active===v?'on':''}" data-nav="${v}">${IC[v]}${k}</button>`).join('');
   const tr=TRAIL.filter(has);
@@ -1543,7 +1596,7 @@ function go(view,params={}){
 function render(){
   renderNav();
   const m=$('#main');
-  const V={topic:viewTopic,space:viewSpace,thinkopen:viewThinkOpen,deep:viewDeep,home:viewHome,explore:viewExplore,detail:viewDetail,map:viewMap,think:viewThink,scenario:viewScenario,me:viewMe,notes:viewNotes}[state.view]||viewHome;
+  const V={inquiry:viewInquiry,iq:viewIq,topic:viewTopic,space:viewSpace,thinkopen:viewThinkOpen,deep:viewDeep,home:viewHome,explore:viewExplore,detail:viewDetail,map:viewMap,think:viewThink,scenario:viewScenario,me:viewMe,notes:viewNotes}[state.view]||viewHome;
   m.innerHTML = topbar()+V();
   after[state.view]&&after[state.view]();
   clearInterval(genTick);
@@ -1596,6 +1649,7 @@ function viewHomeOld(){
   </div>`;
 }
 after.home=()=>{
+  $('#iqQuick')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#iqQ2').value.trim();if(q.length<4){$('#iqQ2').focus();return}const x=newIq(q,'');go('iq',{id:x.id,tab:'plan'})});
   $('#homeSearch').addEventListener('submit',e=>{e.preventDefault();go('explore',{q:$('#homeQ').value})});
 };
 
@@ -2817,6 +2871,7 @@ function loadExtra(k,d){
   else if(d.kind==='th'&&d.id) THINKS[d.id]={...d,docId:k};
   else if(d.kind==='topic'&&d.node) TOPIC[d.node]={...d,docId:k};
   else if(d.kind==='parents'&&d.map) PARENTS={...d.map};
+  else if(d.kind==='iq'&&d.id) IQS[d.id]={...d,docId:k};
 }
 
 /* ---------- level ---------- */
@@ -3266,6 +3321,7 @@ function viewHome(){
   const lv=cont?levelOf(cont.id):0;
   return `<div class="wrap home2">
    <h1 class="greet">${greet}${window.ITMAP_USER&&window.ITMAP_USER.name&&window.ITMAP_USER.name!=='나'?`, ${esc(window.ITMAP_USER.name)}님`:''} 👋</h1>
+   <form class="card hiq" id="iqQuick"><span class="label" style="color:var(--accent)">💭 요즘 궁금한 것</span><div class="searchbar" style="box-shadow:none"><label class="sr" for="iqQ2">궁금증</label><input id="iqQ2" placeholder="예: 인터넷은 어떻게 다른 컴퓨터까지 데이터를 전달할까?" autocomplete="off"><button class="btn primary">탐구 시작</button></div>${(()=>{const l=Object.values(IQS).sort(byNewest('updated')).slice(0,2);return l.length?`<div class="hiqlist">${l.map(x=>`<button class="linkbtn" data-iq="${x.id}">↪ ${esc(x.q.slice(0,50))}${x.q.length>50?'…':''} <small class="muted">${iqStage(x).filter(Boolean).length}/4</small></button>`).join('')}</div>`:'<p class="muted" style="font-size:12.5px">공부 주제든 일상 궁금증이든 좋아요. AI가 답 대신 탐구 질문과 순서를 제안해요.</p>'})()}</form>
    <div class="hgrid">
     <article class="card hcont">${cont?`<span class="label">오늘 이어서 공부하기</span><h2>${esc(cont.name)}</h2><div class="lvmeter" aria-label="이해도 Lv.${lv}">${[1,2,3,4,5].map(i=>`<i class="${i<=lv?'on':''}"></i>`).join('')}<span>이해도 Lv.${lv}</span></div><p class="muted">${esc(cont.summary)}</p>
       <div class="aibtns"><button class="btn primary" ${COURSES[cont.id]?`data-deep="${cont.id}"`:`data-open="${cont.id}"`}>계속 학습하기 →</button>${UND[cont.id]?'':`<button class="btn" data-und="${cont.id}">내 말로 설명하기</button>`}</div>`
@@ -3437,6 +3493,246 @@ function parentCard(n){
     <select class="fld" id="parentSel"><option value="">— 큰 개념으로 두기 —</option>${opts.map(m=>`<option value="${m.id}" ${p===m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select>
     <p class="muted" style="font-size:12px">하위 개념은 전체 지도에서 상위 개념 안에 접혀 보여요.</p></div>`;
 }
+
+/* ===================== INQUIRY: 궁금증 탐구 → 원리 파헤치기 → 지식 연결 → 내 생각 다듬기 ===================== */
+const IQS={};
+const IQ_TABS=[['plan','1. 궁금증 탐구'],['dig','2. 원리 파헤치기'],['conn','3. 지식 연결하기'],['refl','4. 내 생각 다듬기']];
+const IQ_EX=['인터넷은 어떻게 다른 컴퓨터까지 데이터를 전달할까?','와이파이 신호는 어떻게 벽을 지나 내 폰까지 올까?','클러스터에서 노드 하나가 죽으면 서비스는 어떻게 버틸까?','카톡 메시지는 상대가 꺼져 있어도 어떻게 나중에 도착할까?'];
+const iqDoc=x=>saveDoc(x);
+function newIq(q,before){
+  const id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  const x={docId:'iq-'+id,kind:'iq',id,q:q.trim().slice(0,300),before:(before||'').trim(),created:nowISO(),updated:nowISO(),plan:null,items:[],conns:[],refl:{wrong:'',now:'',unknown:''},reflFb:null};
+  IQS[id]=x; iqDoc(x); return x;
+}
+function iqStage(x){ return [!!(x.plan&&x.items.length), x.items.some(i=>i.md), x.conns.some(c=>c.myWhy), !!(x.refl&&x.refl.now)] }
+function iqTouch(x){ x.updated=nowISO(); iqDoc(x) }
+
+/* ---------- list page ---------- */
+let IQF='';
+function viewInquiry(){
+  const list=Object.values(IQS).filter(x=>!IQF||(x.q+' '+x.before+' '+(x.refl&&x.refl.now||'')).toLowerCase().includes(IQF.toLowerCase())).sort(byNewest('updated'));
+  return `<div class="wrap"><div class="page-h"><span class="eyebrow">Inquiry</span><h1>🔍 궁금증 탐구</h1><p class="muted" style="max-width:64ch">공부 주제든 일상에서 생긴 궁금증이든 좋아요. AI가 답을 바로 주는 대신, 원리를 이해하는 데 필요한 질문과 탐구 순서를 제안하고 함께 파고들어요.</p></div>
+   <form class="card iqnew" id="iqNew">
+     <label class="undf"><span>무엇이 궁금한가요?</span><input class="fld" id="iqQ" placeholder="예: 인터넷은 어떻게 다른 컴퓨터까지 데이터를 전달할까?" autocomplete="off"></label>
+     <div class="chips">${IQ_EX.map(e=>`<button type="button" class="chip" data-iqex="${esc(e)}" style="font-size:13px">${esc(e)}</button>`).join('')}</div>
+     <label class="undf"><span>탐구 전, 지금 내 생각 <span class="muted" style="font-weight:400">(선택 · 나중에 비교해요)</span></span><textarea class="fld" id="iqBefore" rows="2" placeholder="틀려도 괜찮아요. 지금 알고 있는 대로, 짐작하는 대로 적어 보세요."></textarea></label>
+     <div><button class="btn primary">탐구 시작</button></div>
+   </form>
+   <div class="section-title" style="margin-top:26px"><h2 style="font-size:18px">내 탐구 기록 <span class="muted" style="font-size:13px;font-weight:500">${Object.keys(IQS).length}</span></h2>${Object.keys(IQS).length?`<input class="fld" id="iqFind" placeholder="탐구 기록 검색" value="${esc(IQF)}" style="max-width:220px">`:''}</div>
+   <div class="iqlist">${list.map(x=>{const s=iqStage(x);return `<button class="card iqcard" data-iq="${x.id}"><b>${esc(x.q)}</b><span class="iqstages">${IQ_TABS.map((t,i)=>`<i class="${s[i]?'on':''}" title="${t[1]}"></i>`).join('')}<small>${s.filter(Boolean).length}/4 단계 · ${fmtDate(x.updated)}</small></span>${x.refl&&x.refl.now?`<span class="muted iqnow">지금 내 설명: ${esc(x.refl.now.slice(0,90))}${x.refl.now.length>90?'…':''}</span>`:''}</button>`}).join('')||(Object.keys(IQS).length?'<p class="muted">검색 결과가 없어요.</p>':'<p class="muted">아직 탐구 기록이 없어요. 위에 첫 궁금증을 적어 보세요.</p>')}</div>
+  </div>`;
+}
+after.inquiry=()=>{
+  $$('[data-iqex]').forEach(b=>b.addEventListener('click',()=>{$('#iqQ').value=b.dataset.iqex;$('#iqBefore').focus()}));
+  $('#iqNew')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#iqQ').value.trim();if(q.length<4){$('#iqQ').focus();return}const x=newIq(q,$('#iqBefore').value);go('iq',{id:x.id,tab:'plan'})});
+  $('#iqFind')?.addEventListener('input',e=>{IQF=e.target.value;const y=scrollY;render();scrollTo(0,y);const f=$('#iqFind');if(f){f.focus();f.setSelectionRange(f.value.length,f.value.length)}});
+};
+
+/* ---------- detail ---------- */
+function iqItemTree(x,cur){
+  const kids=p=>x.items.filter(i=>(i.parent||null)===p);
+  const row=(i,d)=>`<button class="iqnode ${i.id===cur?'on':''}" data-iqsel="${i.id}" style="padding-left:${10+d*16}px"><span class="iqdot ${i.md?'done':''}"></span><span>${esc(i.label)}</span></button>${kids(i.id).map(k=>row(k,d+1)).join('')}`;
+  return kids(null).map(i=>row(i,0)).join('');
+}
+function viewIq(){
+  const x=IQS[state.id]; if(!x) return viewInquiry();
+  const tab=state.tab||(x.plan?'dig':'plan'); const st=iqStage(x);
+  const head=`<div class="game-head"><button class="btn ghost sm" data-nav="inquiry" style="align-self:flex-start;margin-left:-10px">← 탐구 기록</button><span class="eyebrow" style="color:var(--accent)">궁금증 탐구</span><h1 class="iqtitle">${esc(x.q)}</h1></div>
+   <div class="iqtabs" role="tablist">${IQ_TABS.map(([k,l],i)=>`<button role="tab" class="${tab===k?'on':''} ${st[i]?'done':''}" aria-selected="${tab===k}" data-iqtab="${k}">${st[i]?'✓ ':''}${l}</button>`).join('')}</div>`;
+  let body='';
+  if(tab==='plan') body=iqPlan(x);
+  else if(tab==='dig') body=iqDig(x);
+  else if(tab==='conn') body=iqConn(x);
+  else body=iqRefl(x);
+  return `<div class="wrap">${head}${body}</div>`;
+}
+function iqPlan(x){
+  const busy=AIB&&AIB.key==='iqplan:'+x.id;
+  return `<div class="stack">
+   <section class="card stack" style="gap:10px"><span class="label">탐구 전, 지금 내 생각</span>
+     <textarea class="fld" id="iqBeforeEdit" rows="3" placeholder="지금 알고 있는 대로, 짐작하는 대로 적어 보세요. 마지막 단계에서 탐구 후 이해와 비교해요.">${esc(x.before)}</textarea>
+     <p class="muted" style="font-size:12.5px">자동 저장돼요.</p></section>
+   <section class="card stack" style="gap:12px"><div class="section-title" style="margin:0"><h2 style="font-size:18px">🧭 탐구 단계</h2>${x.plan&&!busy&&CLOUD.sample?'<button class="btn ghost sm" id="iqReplan">다시 제안받기</button>':''}</div>
+     ${busy?aiBusy('이 궁금증을 이해하려면 어떤 질문을 어떤 순서로 해야 할지 정리하고 있어요')
+      :x.plan?`${x.plan.hint?`<aside class="callout c-key"><span class="clabel">내 생각에 대해</span><p>${esc(x.plan.hint)}</p></aside>`:''}
+        <ol class="iqsteps">${x.items.filter(i=>!i.parent).map(i=>`<li><div><b>${esc(i.label)}</b>${i.why?`<p class="muted">${esc(i.why)}</p>`:''}</div><button class="btn sm ${i.md?'':'primary'}" data-iqgo="${i.id}">${i.md?'다시 보기':'파헤치기 →'}</button></li>`).join('')}</ol>
+        ${x.plan.terms&&x.plan.terms.length?`<div><span class="label">탐구하며 만날 용어</span><div class="chips" style="margin-top:6px">${x.plan.terms.map(t=>{const ex=findByName(t);return ex?nodeChip(ex.id):`<span class="tag">${esc(t)}</span>`}).join('')}</div></div>`:''}`
+      :`<p style="font-size:14.5px">AI가 정답 대신, 원리를 이해하려면 무엇을 어떤 순서로 물어봐야 하는지 <b>탐구 질문</b>을 제안해요.</p>${CLOUD.sample?`<div><button class="btn primary" id="iqPlanBtn" ${AIB?'disabled':''}>AI에게 탐구 단계 제안받기</button></div>`:''}`}
+     <form id="iqAddStep" class="caprow"><label class="sr" for="iqStepQ">내 하위 질문</label><input class="fld" id="iqStepQ" placeholder="내가 직접 하위 질문 추가하기" style="flex:1 1 240px"><button class="btn sm">추가</button></form>
+   </section></div>`;
+}
+function iqDig(x){
+  if(!x.items.length) return `<div class="card"><p>먼저 1단계에서 탐구 질문을 정하세요.</p><div style="margin-top:10px"><button class="btn primary" data-iqtab="plan">1. 궁금증 탐구로 가기</button></div></div>`;
+  const cur=x.items.find(i=>i.id===state.sel)||x.items.find(i=>!i.md)||x.items[0];
+  state.sel=cur.id;
+  const busy=AIB&&AIB.key==='iqdig:'+x.id+':'+cur.id;
+  const chain=[];let p=cur;while(p){chain.unshift(p);p=x.items.find(i=>i.id===p.parent)}
+  return `<div class="iqdig">
+    <aside class="card iqtree"><span class="label">파헤칠 질문</span><div class="iqnodes">${iqItemTree(x,cur.id)}</div></aside>
+    <div style="min-width:0;display:flex;flex-direction:column;gap:14px">
+     ${chain.length>1?`<div class="crumbs">${chain.slice(0,-1).map(c=>`<button data-iqsel="${c.id}">${esc(c.label.slice(0,30))}</button><span>›</span>`).join('')}<span class="cur">${esc(cur.label.slice(0,40))}</span></div>`:''}
+     <h2 class="iqh">${esc(cur.label)}</h2>
+     <div class="iqlens"><span>무엇이 일어나는가</span><span>내부 과정</span><span>왜 이렇게 동작하나</span><span>하나가 달라지면?</span></div>
+     ${busy?`${aiBusy('네 가지 관점으로 원리를 파헤치고 있어요')}<div class="md lesson" id="digBody">${md(AIB.text||'',null)}</div>`
+      :cur.md?`<div class="iqbodywrap"><div class="md lesson" id="digBody">${md(cur.md,null)}</div><button class="btn sm primary iqselbtn" id="iqSelBtn" hidden>🔎 이 부분 더 파고들기</button></div>
+        <p class="muted" style="font-size:12.5px">💡 설명을 읽다가 궁금한 부분을 <b>드래그(길게 눌러 선택)</b>하면 그 부분만 따로 더 깊이 파고들 수 있어요.</p>
+        <form id="iqDeeper" class="caprow"><label class="sr" for="iqDeeperQ">더 궁금한 것</label><input class="fld" id="iqDeeperQ" placeholder="여기서 더 궁금한 것을 적어도 돼요" style="flex:1 1 240px"><button class="btn sm">더 파고들기</button><button type="button" class="btn ghost sm" id="iqRedig">다시 설명받기</button></form>`
+      :`<div class="card"><p style="font-size:14.5px">이 질문을 <b>무엇이 일어나는가 → 내부 과정 → 왜 이렇게 동작하나 → 하나가 달라지면?</b> 순서로 나눠 설명해요.</p>${CLOUD.sample?`<div style="margin-top:10px"><button class="btn primary" id="iqDigBtn" ${AIB?'disabled':''}>이 질문 파헤치기</button></div>`:''}</div>`}
+     <div class="aibtns"><button class="btn sm" data-iqtab="conn">다음: 3. 지식 연결하기 →</button></div>
+    </div></div>`;
+}
+function iqConn(x){
+  const busy=AIB&&AIB.key==='iqconn:'+x.id;
+  const cand=x.conns.filter(c=>!c.myWhy), saved=x.conns.filter(c=>c.myWhy);
+  const card=(c,i)=>{const n=c.nodeId&&byId[c.nodeId];const cb=AIB&&AIB.key==='iqcc:'+x.id+':'+i;
+    return `<div class="card iqconn ${c.myWhy?'saved':''}"><div class="iqconnhead">${n?nodeChip(n.id):`<span class="tag" style="font-size:13px">${esc(c.name)}</span>${CLOUD.sample?`<button class="why-btn" data-gen="${esc(c.name)}">+ 지도에 추가</button>`:''}`}${c.myWhy?'<span class="tag ai" style="font-size:11px">내 연결</span>':''}<button class="linkbtn" data-iqcdel="${i}" style="margin-left:auto">삭제</button></div>
+      ${c.hint?`<p class="muted" style="font-size:13.5px">🤔 ${esc(c.hint)}</p>`:''}
+      <label class="sr" for="iqwhy-${i}">왜 연결되는지</label><textarea class="fld" id="iqwhy-${i}" rows="2" data-iqwhy="${i}" placeholder="왜 연결되는지 내 말로 설명해 보세요">${esc(c.myWhy||c.draft||'')}</textarea>
+      <div class="aibtns"><button class="btn sm primary" data-iqcsave="${i}">${c.myWhy?'고쳐 저장':'내 연결로 저장'}</button>${CLOUD.sample&&(c.myWhy||c.draft)?`<button class="btn sm" data-iqccheck="${i}" ${AIB?'disabled':''}>AI에게 내 설명 확인받기</button>`:''}</div>
+      ${cb?aiBusy('내 설명이 맞는지 보고 있어요'):c.fb?`<div class="fb-card" style="padding:10px 12px">${c.fb.good?`<div class="fbgrp good"><ul><li><span class="sign">+</span>${esc(c.fb.good)}</li></ul></div>`:''}${c.fb.fix?`<div class="fbgrp miss"><ul><li><span class="sign">−</span>${esc(c.fb.fix)}</li></ul></div>`:''}${c.fb.deeper?`<aside class="callout c-key"><span class="clabel">더 생각해 보기</span><p>${esc(c.fb.deeper)}</p></aside>`:''}</div>`:''}
+    </div>`};
+  return `<div class="stack">
+   <p class="muted" style="max-width:66ch">탐구한 내용을 이미 알던 개념과 이어 보세요. 관련 키워드를 모으는 게 아니라 <b>왜 연결되는지 내 말로</b> 쓰는 게 핵심이에요. 저장한 연결은 그 개념 페이지의 "내가 알게 된 것"에도 남아요.</p>
+   ${busy?aiBusy('탐구 내용과 이어질 만한 개념을 찾고 있어요'):CLOUD.sample?`<div><button class="btn ${cand.length||saved.length?'':'primary'}" id="iqConnBtn" ${AIB?'disabled':''}>${cand.length||saved.length?'연결 후보 더 찾기':'AI로 연결 후보 찾기'}</button></div>`:''}
+   ${x.conns.map((c,i)=>card(c,i)).join('')}
+   <form id="iqConnAdd" class="card caprow"><span class="label" style="flex-basis:100%">직접 연결 추가</span><select class="fld" id="iqConnNode" aria-label="개념"><option value="">지도에 있는 개념 선택</option>${sortedNodes().map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select><input class="fld" id="iqConnName" placeholder="또는 개념 이름 직접 입력 (예: LLT)" style="flex:1 1 160px"><button class="btn sm">추가</button></form>
+   <div class="aibtns"><button class="btn sm" data-iqtab="refl">다음: 4. 내 생각 다듬기 →</button></div>
+  </div>`;
+}
+function iqRefl(x){
+  const r=x.refl||{}; const busy=AIB&&AIB.key==='iqrefl:'+x.id;
+  const F=[['wrong','무엇을 잘못 이해했는가?','처음 생각에서 틀렸거나 빠졌던 부분'],['now','지금은 어떻게 설명할 수 있는가?','탐구 후 이해한 대로, 내 말로'],['unknown','아직 이해하지 못한 것은?','한 줄에 하나씩 · 저장하면 지식 공백으로 등록돼요']];
+  return `<div class="iqrefl">
+   <section class="card stack" style="gap:8px"><span class="label">처음에는 어떻게 생각했는가?</span>${x.before?`<p class="iqbefore">${esc(x.before)}</p>`:'<p class="muted" style="font-size:14px">탐구 전 생각을 적지 않았어요. 1단계에서 지금이라도 기억나는 대로 적어 두면 비교할 수 있어요.</p>'}<span class="muted" style="font-size:12px">${fmtDate(x.created)} 기록</span></section>
+   <form id="iqReflForm" class="card stack" style="gap:12px">${F.map(([k,l,ph])=>`<label class="undf"><span>${l}</span><textarea class="fld" rows="${k==='now'?5:3}" data-iqr="${k}" placeholder="${ph}">${esc(r[k]||'')}</textarea></label>`).join('')}
+     <div class="aibtns"><button class="btn primary sm">저장</button>${CLOUD.sample?`<button type="button" class="btn sm" id="iqReflAI" ${AIB?'disabled':''}>처음 생각과 비교 피드백 받기</button>`:''}</div></form>
+   ${busy?aiBusy('처음 생각과 지금 설명을 비교하고 있어요'):x.reflFb?fbHTML({...x.reflFb,improved:x.reflFb.improved,lacking:x.reflFb.stillUnclear,wrong:x.reflFb.misconceptions,next:x.reflFb.next,gaps:x.reflFb.gaps,at:x.reflFb.at},null,'비교 피드백'):''}
+  </div>`;
+}
+
+/* ---------- AI calls ---------- */
+function iqContext(x){
+  const done=x.items.filter(i=>i.md).map(i=>`- ${i.label}`).join('\n');
+  return `탐구 질문: "${x.q}"\n탐구 전 학습자 생각: "${x.before||'(없음)'}"\n지금까지 파헤친 하위 질문:\n${done||'(아직 없음)'}`;
+}
+async function iqPlanAI(x,signal){
+  const r=await aj(`당신은 탐구를 돕는 IT 튜터입니다. 학습자가 공부나 일상에서 생긴 궁금증을 가져왔습니다.
+${iqContext(x)}
+정답을 바로 알려주지 말고, 원리를 스스로 이해하려면 무엇을 어떤 순서로 물어봐야 하는지 탐구 계획을 세우세요.
+- steps: 하위 질문 3~6개. 관찰할 수 있는 현상 → 내부 과정 → 그렇게 설계된 이유 → 조건을 바꿔 보는 실험 순서. 각 {"q":"하위 질문","why":"이걸 알아야 하는 이유 1문장"}
+- hint: 학습자의 탐구 전 생각에서 이미 맞게 짚은 점이나 확인해 볼 점 1~2문장 (정답 공개 금지, 생각이 없으면 빈 문자열)
+- terms: 탐구 중 만나게 될 핵심 용어 3~8개
+JSON만: {"steps":[],"hint":"","terms":[]}`,signal);
+  const steps=arrOf(r.steps).map(s=>({q:str(s&&s.q,200),why:str(s&&s.why,200)})).filter(s=>s.q).slice(0,6);
+  if(!steps.length) throw {code:'bad_shape'};
+  const keep=x.items.filter(i=>i.md||i.own);
+  x.items=[...steps.map(s=>({id:uid('s'),parent:null,label:s.q,why:s.why,md:''})),...keep.filter(i=>!steps.some(s=>s.q===i.label))];
+  x.plan={hint:str(r.hint,400),terms:strs(r.terms,8,40),at:nowISO()}; iqTouch(x);
+}
+async function iqDigAI(x,item,signal){
+  const chain=[];let p=x.items.find(i=>i.id===item.parent);while(p){chain.unshift(p.label);p=x.items.find(i=>i.id===p.parent)}
+  const prompt=`당신은 원리를 차근차근 파헤쳐 주는 IT 튜터입니다.
+${iqContext(x)}
+${chain.length?`지금 파고드는 흐름: ${chain.join(' → ')} → (이번)`:''}
+이번에 파헤칠 부분: "${item.label}"
+${COMPLETENESS}
+Markdown으로, 아래 네 관점 구조를 지키세요:
+## 무엇이 일어나는가
+(겉으로 관찰되는 현상 2~4문장)
+## 내부적으로 어떤 과정을 거치는가
+(단계별로. flow 또는 seq 그림 1개 필수)
+## 왜 이런 방식으로 동작하는가
+(설계 이유와 트레이드오프)
+## 하나가 달라지면?
+(구성요소나 조건 하나를 바꾸거나 없앴을 때 일어나는 일 2~3가지, 목록)
+## 더 파고들 만한 질문
+(2~3개 목록)
+문단은 짧게, 다른 개념 이름은 [[이름]]으로. 1,500~2,500자. 한국어.
+${DIAGRAM_GUIDE}`;
+  const {text}=await CLOUD.sample(prompt,{signal,modelTier:'default',onText:({text})=>{if(AIB)AIB.text=text;const el=$('#digBody');if(el)el.innerHTML=md(text,null)}});
+  item.md=text; item.at=nowISO(); iqTouch(x);
+}
+async function iqConnAI(x,signal){
+  const r=await aj(`당신은 지식 연결을 돕는 IT 튜터입니다.
+${iqContext(x)}
+지도에 있는 개념 (id: 이름): ${NODES.map(m=>m.id+': '+m.name).join(', ')}
+이미 후보로 나온 것: ${x.conns.map(c=>c.name).join(', ')||'없음'}
+이 탐구와 이어서 이해하면 좋은 개념을 4~6개 고르세요. 지도에 있으면 id를, 없으면 이름만 (예: LLT, NIC, TCP/IP, 클러스터 구조).
+각 hint는 "어떤 관점에서 연결을 생각해 보면 좋은지"를 묻는 질문 1문장. 연결 이유를 직접 말하지 마세요.
+JSON만: {"items":[{"id":null,"name":"","hint":""}]}`,signal);
+  const items=arrOf(r.items).map(it=>{const id=has(it&&it.id)?it.id:null;const nm=id?byId[id].name:str(it&&it.name,40);const ex=!id&&nm?findByName(nm):null;return {nodeId:id||(ex&&ex.id)||null,name:id?nm:(ex?ex.name:nm),hint:str(it&&it.hint,200),myWhy:''}}).filter(c=>c.name&&!x.conns.some(y=>y.name.toLowerCase()===c.name.toLowerCase())).slice(0,6);
+  if(!items.length){toast('새로 찾은 연결 후보가 없어요.');return}
+  x.conns.push(...items); iqTouch(x);
+}
+async function iqConnCheck(x,i,signal){
+  const c=x.conns[i]; const why=c.myWhy||c.draft||'';
+  const r=await aj(`학습자가 탐구 "${x.q}"와 개념 "${c.name}"이(가) 왜 연결되는지 자기 말로 설명했습니다: "${why}"
+정답을 대신 써 주지 말고 짧게 평가하세요. good: 맞게 짚은 점 1문장(없으면 ""), fix: 틀렸거나 부족한 점과 고칠 방향 1문장(없으면 ""), deeper: 연결을 더 깊게 생각해 볼 질문 1개.
+JSON만: {"good":"","fix":"","deeper":""}`,signal);
+  c.fb={good:str(r.good,300),fix:str(r.fix,300),deeper:str(r.deeper,300)}; iqTouch(x);
+}
+async function iqReflAI(x,signal){
+  const r0=x.refl||{};
+  const r=await aj(`학습자가 궁금증을 탐구한 뒤, 처음 생각과 지금 이해를 비교했습니다. 정답을 대신 써 주지 말고 평가하세요.
+${iqContext(x)}
+잘못 이해했던 것(학습자 작성): ${r0.wrong||'(비어 있음)'}
+지금 설명(학습자 작성): ${r0.now||'(비어 있음)'}
+아직 모르는 것(학습자 작성): ${r0.unknown||'(비어 있음)'}
+- improved: 처음 생각보다 나아진 점 1~3개 (구체적으로)
+- misconceptions: 지금 설명에도 남아 있는 오해나 부정확한 점 0~2개, 고칠 방향만
+- stillUnclear: 아직 덜 설명된 부분 0~2개
+- next: 다음에 해 볼 탐구 1문장
+- gaps: 지식 공백 후보 0~3개 (짧은 질문형)
+JSON만: {"improved":[],"misconceptions":[],"stillUnclear":[],"next":"","gaps":[]}`,signal);
+  x.reflFb={improved:strs(r.improved,3),misconceptions:strs(r.misconceptions,2),stillUnclear:strs(r.stillUnclear,2),next:str(r.next,300),gaps:strs(r.gaps,3,120),at:nowISO()}; iqTouch(x);
+}
+
+/* ---------- wiring ---------- */
+after.iq=()=>{
+  const x=IQS[state.id]; if(!x) return; let tm=null;
+  const be=$('#iqBeforeEdit'); if(be) be.addEventListener('input',()=>{x.before=be.value;clearTimeout(tm);tm=setTimeout(()=>iqTouch(x),800)});
+  $('#iqPlanBtn')?.addEventListener('click',()=>runAI('iqplan:'+x.id,s=>iqPlanAI(x,s)));
+  const rp=$('#iqReplan'); if(rp) rp.addEventListener('click',()=>{ if(rp.dataset.armed) runAI('iqplan:'+x.id,s=>iqPlanAI(x,s)); else {rp.dataset.armed='1';rp.textContent='한 번 더 누르면 새로 제안받아요 (파헤친 내용은 남아요)'} });
+  $('#iqAddStep')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#iqStepQ').value.trim();if(!q)return;x.items.push({id:uid('s'),parent:null,label:q.slice(0,200),why:'',md:'',own:true});iqTouch(x);rerender()});
+  const cur=x.items.find(i=>i.id===state.sel);
+  $('#iqDigBtn')?.addEventListener('click',()=>cur&&runAI('iqdig:'+x.id+':'+cur.id,s=>iqDigAI(x,cur,s)));
+  const rd=$('#iqRedig'); if(rd&&cur) rd.addEventListener('click',()=>{ if(rd.dataset.armed) runAI('iqdig:'+x.id+':'+cur.id,s=>iqDigAI(x,cur,s)); else {rd.dataset.armed='1';rd.textContent='한 번 더 누르면 새로 설명받아요'} });
+  const deeper=label=>{ if(!cur||!label) return; const it={id:uid('d'),parent:cur.id,label:label.slice(0,120),md:''}; x.items.push(it); iqTouch(x); state.sel=it.id; if(CLOUD.sample) runAI('iqdig:'+x.id+':'+it.id,s=>iqDigAI(x,it,s)); else rerender(); };
+  $('#iqDeeper')?.addEventListener('submit',e=>{e.preventDefault();deeper($('#iqDeeperQ').value.trim())});
+  const body=$('#digBody'), sb=$('#iqSelBtn');
+  if(body&&sb){
+    let selText='';
+    const check=()=>{ const s=window.getSelection(); const t=s?String(s).trim():''; if(t.length>=2&&t.length<=120&&s.rangeCount&&body.contains(s.anchorNode)){ selText=t; const r=s.getRangeAt(0).getBoundingClientRect(), w=body.parentElement.getBoundingClientRect(); sb.style.top=(r.bottom-w.top+6)+'px'; sb.style.left=Math.max(0,Math.min(r.left-w.left,w.width-190))+'px'; sb.hidden=false; } else { sb.hidden=true; } };
+    body.addEventListener('mouseup',()=>setTimeout(check,10)); body.addEventListener('touchend',()=>setTimeout(check,350));
+    document.addEventListener('selectionchange',()=>{ if(!sb.isConnected) return; const s=window.getSelection(); if(!s||!String(s).trim()) sb.hidden=true; });
+    sb.addEventListener('mousedown',e=>e.preventDefault());
+    sb.addEventListener('click',()=>{ sb.hidden=true; deeper(`"${selText}" 부분 더 자세히`); });
+  }
+  $('#iqConnBtn')?.addEventListener('click',()=>runAI('iqconn:'+x.id,s=>iqConnAI(x,s)));
+  $$('[data-iqwhy]').forEach(t=>t.addEventListener('input',()=>{x.conns[+t.dataset.iqwhy].draft=t.value}));
+  $$('[data-iqcsave]').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.iqcsave;const c=x.conns[i];const v=($('#iqwhy-'+i).value||'').trim();if(v.length<5){toast('왜 연결되는지 한 문장 이상 적어 주세요.');return}
+    const first=!c.myWhy; c.myWhy=v; c.draft=''; c.savedAt=nowISO(); iqTouch(x);
+    if(c.nodeId&&has(c.nodeId)){ if(c.insId){const ins=INSIGHTS.find(y=>y.docId===c.insId);if(ins){ins.text=v;ins.edited=nowISO();saveInsight(ins)}} else {const ins=addInsight({node:c.nodeId,text:v,raw:'',source:`탐구 연결 · ${x.q.slice(0,60)}`});c.insId=ins.docId;iqTouch(x)} }
+    toast(first?(c.nodeId?`내 연결로 저장했어요. ${byId[c.nodeId].name} 페이지의 노트에도 남겼어요.`:'내 연결로 저장했어요.'):'고쳐 저장했어요.'); rerender()}));
+  $$('[data-iqccheck]').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.iqccheck;runAI('iqcc:'+x.id+':'+i,s=>iqConnCheck(x,i,s))}));
+  $$('[data-iqcdel]').forEach(b=>b.addEventListener('click',()=>{ if(b.dataset.armed){x.conns.splice(+b.dataset.iqcdel,1);iqTouch(x);rerender()} else {b.dataset.armed='1';b.textContent='한 번 더'} }));
+  $('#iqConnAdd')?.addEventListener('submit',e=>{e.preventDefault();const id=$('#iqConnNode').value;const nm=$('#iqConnName').value.trim();if(!id&&!nm)return;
+    const ex=!id&&findByName(nm);const nodeId=id||(ex&&ex.id)||null;const name=nodeId?byId[nodeId].name:nm;
+    if(x.conns.some(c=>c.name.toLowerCase()===name.toLowerCase())){toast('이미 있는 연결이에요.');return}
+    x.conns.push({nodeId,name,hint:'',myWhy:''});iqTouch(x);rerender();setTimeout(()=>$('#iqwhy-'+(x.conns.length-1))?.focus(),50)});
+  const rf=$('#iqReflForm'); if(rf){
+    const sync=()=>{x.refl=x.refl||{};$$('[data-iqr]').forEach(t=>x.refl[t.dataset.iqr]=t.value.trim())};
+    rf.addEventListener('input',()=>{sync();clearTimeout(tm);tm=setTimeout(()=>iqTouch(x),900)});
+    rf.addEventListener('submit',e=>{e.preventDefault();sync();iqTouch(x);let c=0;String(x.refl.unknown||'').split('\n').map(s=>s.replace(/^[\s\-*•\d.)]+/,'').trim()).filter(s=>s.length>=3).forEach(t=>{if(addGap({text:t,source:'manual',why:`탐구: ${x.q.slice(0,60)}`}))c++});toast(c?`저장했어요. 지식 공백 ${c}개를 등록했어요.`:'저장했어요.');rerender()});
+    $('#iqReflAI')?.addEventListener('click',()=>{sync();if(!x.refl.now){toast('"지금은 어떻게 설명할 수 있는가"를 먼저 써 주세요.');return}iqTouch(x);runAI('iqrefl:'+x.id,s=>iqReflAI(x,s))});
+  }
+};
+document.addEventListener('click',e=>{
+  const o=e.target.closest('[data-iq]'); if(o){go('iq',{id:o.dataset.iq});return}
+  const t=e.target.closest('[data-iqtab]'); if(t&&state.view==='iq'){state.tab=t.dataset.iqtab;render();window.scrollTo(0,0);return}
+  const s=e.target.closest('[data-iqsel]'); if(s&&state.view==='iq'){state.sel=s.dataset.iqsel;render();return}
+  const g=e.target.closest('[data-iqgo]'); if(g&&state.view==='iq'){state.tab='dig';state.sel=g.dataset.iqgo;render();window.scrollTo(0,0);return}
+});
 
 function syncLine(){
   if(!window.ITMAP_SYNC) return '';
