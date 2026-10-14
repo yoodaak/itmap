@@ -42,12 +42,14 @@ async function callGemini(method, body, signal) {
       clearTimeout(timer);
       if (res.ok) return { res, model };
       const detail = await res.text();
-      if (res.status === 400 && noThinking && /thinking/i.test(detail)) { noThinking = false; attempt--; continue; }
+      // 400 "invalid argument": newer models (e.g. what gemini-flash-latest now points to) may reject thinkingBudget:0 → retry without it
+      if (res.status === 400 && noThinking && !/api.key|location/i.test(detail)) { noThinking = false; attempt--; continue; }
       last = { status: res.status, detail, model };
       console.warn('Gemini', model, res.status, detail.slice(0, 200));
       if (res.status === 503 || res.status === 500) { if (attempt === 0) { await sleep(1500); continue; } break; }
       if (res.status === 429 || res.status === 404) break; // next model
-      return { error: last }; // 400 / 401 / 403: a key or request problem, other models won't help
+      if (res.status === 400 && !/api.key|location/i.test(detail)) break; // this model rejects the request → try the next model
+      return { error: last }; // key / permission problem: other models won't help
     }
   }
   return { error: last };
@@ -64,12 +66,13 @@ function explain(status, detail) {
   if (status === 503 || status === 500 || t.includes('high demand') || t.includes('overloaded')) return 'Gemini 서버가 지금 붐벼요 (여러 모델로 다시 시도했지만 모두 바빴어요). 잠시 뒤에 다시 눌러 주세요.';
   if (status === 403 || t.includes('permission')) return 'Gemini API 사용 권한이 없어요. Google AI Studio에서 키를 새로 만들어 넣어 보세요.';
   if (status === 400 && t.includes('location')) return '이 지역에서는 Gemini API를 쓸 수 없다고 나와요.';
+  if (status === 400) return `Gemini가 요청을 거절했어요 [새 버전] (${msg.slice(0, 120)}). 여러 모델(${MODELS().join(', ')})로 다시 시도했지만 모두 실패했어요.`;
   return `Gemini 오류 ${status}: ${msg.slice(0, 200)}`;
 }
 
 export async function GET(request) {
   const url = new URL(request.url);
-  const info = { ok: true, hasKey: !!process.env.GEMINI_API_KEY, passwordProtected: authRequired(), model: process.env.GEMINI_MODEL || 'gemini-flash-latest' };
+  const info = { ok: true, version: '2026-10-13-fix400', hasKey: !!process.env.GEMINI_API_KEY, passwordProtected: authRequired(), model: process.env.GEMINI_MODEL || 'gemini-flash-latest' };
   if (url.searchParams.get('test') !== '1') return json(info);
   const tu = url.searchParams.get('user') || '';
   if (!(await whoami(new Request(request.url, { headers: { 'x-site-password': url.searchParams.get('pw') || '', 'x-itmap-user': encodeURIComponent(tu) } })))) return json({ ...info, test: '비밀번호(pw)가 맞지 않아요. 주소 끝에 &pw=내비밀번호 를 붙여 주세요.' }, 401);
