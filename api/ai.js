@@ -2,7 +2,7 @@
 // Environment variables (Vercel → Project → Settings → Environment Variables):
 //   GEMINI_API_KEY  (required)  key from https://aistudio.google.com/apikey
 //   SITE_PASSWORD   (optional)  if set, the site asks for this password before using AI
-//   GEMINI_MODEL    (optional)  defaults to gemini-flash-latest
+//   GEMINI_MODEL    (optional)  defaults to gemini-3.6-flash (leave unset unless you need a specific model)
 import { whoami, authRequired } from './_auth.js';
 export const config = { maxDuration: 300 };
 
@@ -13,18 +13,22 @@ const json = (obj, status = 200) =>
 
 // Try the configured model first, then lighter/stable fallbacks when Google is overloaded (503),
 // the per-model free quota is used up (429), or a model name doesn't exist (404).
-const MODELS = () => [...new Set([process.env.GEMINI_MODEL || 'gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'].filter(Boolean))];
+// Gemini 2.5 models now return 404 for most keys (Google restricted them in 2026), so Gemini 3.x comes first.
+const DEFAULT_MODEL = 'gemini-3.6-flash';
+const MODELS = () => [...new Set([process.env.GEMINI_MODEL || DEFAULT_MODEL, 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-2.5-flash'].filter(Boolean))];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function callGemini(method, body, signal) {
   let last = null;
   const started = Date.now();
   for (const model of MODELS()) {
-    let noThinking = !/pro/.test(model); // turning off "thinking" makes flash models answer much faster
+    // less "thinking" = much faster answers. Gemini 3 uses thinkingLevel, Gemini 2.5 used thinkingBudget.
+    let noThinking = !/pro/.test(model);
+    const lowThinking = /gemini-2\./.test(model) ? { thinkingBudget: 0 } : { thinkingLevel: 'low' };
     for (let attempt = 0; attempt < 3; attempt++) {
       if (Date.now() - started > 100000) return { error: last || { status: 504, detail: '{"error":{"message":"timeout"}}', model } };
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:${method}`;
       const gc = { ...(body.generationConfig || {}) };
-      if (noThinking) gc.thinkingConfig = { thinkingBudget: 0 };
+      if (noThinking) gc.thinkingConfig = lowThinking;
       const ctl = new AbortController();
       const onAbort = () => ctl.abort();
       if (signal) signal.addEventListener('abort', onAbort);
@@ -60,7 +64,7 @@ function explain(status, detail) {
   try { const e = JSON.parse(detail).error || {}; msg = e.message || ''; reason = ((e.details || []).find((d) => d.reason) || {}).reason || e.status || ''; } catch {}
   const t = (msg + ' ' + reason).toLowerCase();
   if (t.includes('api_key_invalid') || t.includes('api key not valid')) return 'Gemini API 키가 올바르지 않아요. Vercel의 GEMINI_API_KEY 값을 다시 복사해 넣고 Redeploy 하세요.';
-  if (status === 404 || t.includes('not found') || t.includes('is not supported')) return `모델을 찾을 수 없어요 (${process.env.GEMINI_MODEL || 'gemini-flash-latest'}). Vercel에 GEMINI_MODEL=gemini-2.5-flash 를 추가하고 Redeploy 해 보세요.`;
+  if (status === 404 || t.includes('not found') || t.includes('no longer available') || t.includes('is not supported')) return `쓸 수 있는 Gemini 모델을 찾지 못했어요 (시도: ${MODELS().join(', ')}). Vercel의 GEMINI_MODEL 환경 변수를 지우고 Redeploy 해 보세요.`;
   if (status === 429 || t.includes('quota') || t.includes('resource_exhausted')) return 'Gemini 무료 사용량 한도에 걸렸어요. 1분쯤 뒤에 다시 시도하거나, 하루 한도라면 내일 다시 시도하세요.';
   if (status === 504 || t.includes('timeout')) return 'Gemini가 너무 오래 응답하지 않았어요. 잠시 뒤에 다시 시도해 주세요.';
   if (status === 503 || status === 500 || t.includes('high demand') || t.includes('overloaded')) return 'Gemini 서버가 지금 붐벼요 (여러 모델로 다시 시도했지만 모두 바빴어요). 잠시 뒤에 다시 눌러 주세요.';
@@ -72,7 +76,7 @@ function explain(status, detail) {
 
 export async function GET(request) {
   const url = new URL(request.url);
-  const info = { ok: true, version: '2026-10-13-fix400', hasKey: !!process.env.GEMINI_API_KEY, passwordProtected: authRequired(), model: process.env.GEMINI_MODEL || 'gemini-flash-latest' };
+  const info = { ok: true, version: '2026-10-14-gemini3', hasKey: !!process.env.GEMINI_API_KEY, passwordProtected: authRequired(), model: process.env.GEMINI_MODEL || DEFAULT_MODEL };
   if (url.searchParams.get('test') !== '1') return json(info);
   const tu = url.searchParams.get('user') || '';
   if (!(await whoami(new Request(request.url, { headers: { 'x-site-password': url.searchParams.get('pw') || '', 'x-itmap-user': encodeURIComponent(tu) } })))) return json({ ...info, test: '비밀번호(pw)가 맞지 않아요. 주소 끝에 &pw=내비밀번호 를 붙여 주세요.' }, 401);
