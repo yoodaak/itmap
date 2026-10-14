@@ -91,7 +91,25 @@
     throw err('invalid_json','could not parse JSON',text);
   }
   function toMsgs(input){return typeof input==='string'?[{role:'user',content:input}]:input}
-  function sample(input,opts){return call(toMsgs(input),opts||{},false)}
+  // If an answer gets cut off (output limit, dropped stream, stall), ask Gemini to continue right where it stopped, up to 3 times.
+  var CONT='방금 답이 중간에 끊겼어요. 끊긴 바로 그 지점부터 이어서 끝까지 써 주세요. 앞 내용을 반복하거나 인사말·설명을 덧붙이지 말고, 코드 블록·그림 블록 안에서 끊겼다면 그 블록을 이어서 마무리하세요.';
+  async function sample(input,opts){
+    opts=opts||{}; var msgs=toMsgs(input), all='', truncated=false;
+    for(var round=0;round<4;round++){
+      var prefix=all, o={signal:opts.signal,onText:opts.onText?function(x){opts.onText({text:prefix+x.text,delta:x.delta})}:null}, r;
+      try{ r=await call(round?msgs.concat([{role:'assistant',content:all},{role:'user',content:CONT}]):msgs,o,false); }
+      catch(e){
+        // cut mid-stream with real content → treat as truncated and continue; otherwise rethrow
+        if(e&&e.code==='upstream_error'&&e.text&&e.text.length>300&&!(opts.signal&&opts.signal.aborted)){ r={text:e.text,truncated:true}; }
+        else if(round>0&&all){ return {text:all,truncated:true}; }
+        else throw e;
+      }
+      all=all+r.text; truncated=r.truncated;
+      if(!truncated) break;
+    }
+    if(!truncated) window.ITMAP_LAST_ERR='';
+    return {text:all,truncated:truncated};
+  }
   sample.json=async function(input,opts){var r=await call(toMsgs(input),opts||{},true);return parseJSON(r.text)};
   window.ITMAP_STANDALONE=true;
   window.claude={use:async function(name){return name==='sample'?sample:null}};

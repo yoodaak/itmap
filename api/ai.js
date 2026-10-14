@@ -76,7 +76,7 @@ function explain(status, detail) {
 
 export async function GET(request) {
   const url = new URL(request.url);
-  const info = { ok: true, version: '2026-10-14-gemini3', hasKey: !!process.env.GEMINI_API_KEY, passwordProtected: authRequired(), model: process.env.GEMINI_MODEL || DEFAULT_MODEL };
+  const info = { ok: true, version: '2026-10-14-continue', hasKey: !!process.env.GEMINI_API_KEY, passwordProtected: authRequired(), model: process.env.GEMINI_MODEL || DEFAULT_MODEL };
   if (url.searchParams.get('test') !== '1') return json(info);
   const tu = url.searchParams.get('user') || '';
   if (!(await whoami(new Request(request.url, { headers: { 'x-site-password': url.searchParams.get('pw') || '', 'x-itmap-user': encodeURIComponent(tu) } })))) return json({ ...info, test: '비밀번호(pw)가 맞지 않아요. 주소 끝에 &pw=내비밀번호 를 붙여 주세요.' }, 401);
@@ -109,7 +109,7 @@ export async function POST(request) {
   if (!contents.length) return json({ error: 'empty prompt' }, 400);
   if (size > 300000) return json({ error: 'prompt too large' }, 413);
 
-  const generationConfig = { maxOutputTokens: 16384, temperature: 0.7 };
+  const generationConfig = { maxOutputTokens: 32768, temperature: 0.7 };
   if (body.json) generationConfig.responseMimeType = 'application/json';
   const { res: upstream, error } = await callGemini('streamGenerateContent?alt=sse', { contents, generationConfig }, request.signal);
   if (error) return json({ error: explain(error.status, error.detail), detail: error.detail.slice(0, 600) }, error.status === 429 ? 429 : 502);
@@ -118,6 +118,7 @@ export async function POST(request) {
   const dec = new TextDecoder();
   const enc = new TextEncoder();
   let buf = '';
+  let finished = false; // did Gemini say it finished normally?
   const stream = new ReadableStream({
     async pull(ctrl) {
       let idle;
@@ -125,7 +126,7 @@ export async function POST(request) {
       clearTimeout(idle);
       if (r.idle) { ctrl.enqueue(enc.encode('\u0000[[STALLED]]')); ctrl.close(); reader.cancel().catch(() => {}); return; }
       const { done, value } = r;
-      if (done) { ctrl.close(); return; }
+      if (done) { if (!finished) ctrl.enqueue(enc.encode(TR)); ctrl.close(); return; } // stream ended without a finish reason → tell the client it was cut
       buf += dec.decode(value, { stream: true });
       let i;
       while ((i = buf.indexOf('\n')) >= 0) {
@@ -138,7 +139,7 @@ export async function POST(request) {
           const parts = (cand && cand.content && cand.content.parts) || [];
           const txt = parts.filter((p) => !p.thought).map((p) => p.text || '').join('');
           if (txt) ctrl.enqueue(enc.encode(txt));
-          if (cand && cand.finishReason === 'MAX_TOKENS') ctrl.enqueue(enc.encode(TR));
+          if (cand && cand.finishReason) { finished = true; if (cand.finishReason !== 'STOP') ctrl.enqueue(enc.encode(TR)); } // MAX_TOKENS / OTHER / etc. = cut short
         } catch {}
       }
     },
